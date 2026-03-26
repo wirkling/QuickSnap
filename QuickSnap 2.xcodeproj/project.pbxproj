@@ -1,0 +1,445 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0E58711766A1684A7DFB83A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCCDC6B347DFEF6AEBDE66B9 /* Assets.xcassets */; };
+		31D2908FA83FAAEBA7CF3856 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */; };
+		45D471837C394087723395BB /* QuickSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */; };
+		4D536510FAC7FDD8FE85E73A /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25824E6D3662DD3A5E7444FB /* StorageService.swift */; };
+		512F385D7272B68980A27091 /* FolderPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C50AF3A60E2C82F717D112C /* FolderPickerView.swift */; };
+		571D7E5774B8B7EBA01A2020 /* AnnotationShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B193E8B0F343791D6C217A /* AnnotationShape.swift */; };
+		6138298AC2F45C78B08CFFC3 /* CaptureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE57C2C60D786A3519F6417 /* CaptureEngine.swift */; };
+		64F87D381D28419C7F2A5F93 /* ScreenshotManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8414A6CB9C3CA1AFBDA56F2 /* ScreenshotManager.swift */; };
+		66738453B07A9F475507F406 /* CaptureOverlayWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458137A283C6B25564178708 /* CaptureOverlayWindow.swift */; };
+		67978B77C8BFAC4EDD6F6DBF /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CEF2C4260C0C4576C40427 /* MenuBarView.swift */; };
+		7DE0E770442205A480BF8810 /* AnnotationWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E6369CA1BBFF9CA67A4812 /* AnnotationWindow.swift */; };
+		81F02963FCF3715E901D80EA /* CaptureOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */; };
+		8EEC3B49601CC1016F550FEC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AF920B5485C1961AAB84D3 /* AppDelegate.swift */; };
+		A4CA39F49C3868EE80CD16B3 /* FolderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FE7375387D9FE3117C626F /* FolderService.swift */; };
+		B418BEF058EEF955A175C35C /* WindowDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC306600E988C644FE04D4D3 /* WindowDetector.swift */; };
+		C3E677C804D49CB092FF4177 /* AnnotationToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA96F98C295D22D123302F1 /* AnnotationToolbar.swift */; };
+		CB858215B68D7BD6984D8A77 /* PinnedScreenshotPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99B0D6FDCBC59555E778154D /* PinnedScreenshotPanel.swift */; };
+		CC3D0BD0A7F44A7B22FCBF11 /* CaptureOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B74095E7938831D5D8C805D /* CaptureOverlayController.swift */; };
+		E3EC756C087EDB500CCA3812 /* HistoryGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3F5B377DB62E887FAA4AAE /* HistoryGridView.swift */; };
+		E42496AB9BEC96ADD52E45AF /* DraggableThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A970A1938FF534D88671F181 /* DraggableThumbnailView.swift */; };
+		EC9BDF32246FFB156CF25F16 /* LLMNamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B185920028B2894A8CDC1C1C /* LLMNamingService.swift */; };
+		EE66F0C80A6DFFFEDA2CE827 /* ScreenshotRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 658B106B8CABE816336478E5 /* ScreenshotRecord.swift */; };
+		F4B790794A715410B9417823 /* AnnotationCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1DD2796FD98EC11FBDC64481 /* QuickSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuickSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		25824E6D3662DD3A5E7444FB /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		26CEF2C4260C0C4576C40427 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		2E412AF5843E2BCDD86D1651 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		32AF920B5485C1961AAB84D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3EA96F98C295D22D123302F1 /* AnnotationToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationToolbar.swift; sourceTree = "<group>"; };
+		3EE57C2C60D786A3519F6417 /* CaptureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureEngine.swift; sourceTree = "<group>"; };
+		458137A283C6B25564178708 /* CaptureOverlayWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureOverlayWindow.swift; sourceTree = "<group>"; };
+		52B193E8B0F343791D6C217A /* AnnotationShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationShape.swift; sourceTree = "<group>"; };
+		658B106B8CABE816336478E5 /* ScreenshotRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotRecord.swift; sourceTree = "<group>"; };
+		83FE7375387D9FE3117C626F /* FolderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderService.swift; sourceTree = "<group>"; };
+		8838563452DE8E9E6FC23E40 /* QuickSnap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuickSnap.entitlements; sourceTree = "<group>"; };
+		8B74095E7938831D5D8C805D /* CaptureOverlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureOverlayController.swift; sourceTree = "<group>"; };
+		99B0D6FDCBC59555E778154D /* PinnedScreenshotPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedScreenshotPanel.swift; sourceTree = "<group>"; };
+		9C50AF3A60E2C82F717D112C /* FolderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderPickerView.swift; sourceTree = "<group>"; };
+		A970A1938FF534D88671F181 /* DraggableThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableThumbnailView.swift; sourceTree = "<group>"; };
+		AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		B185920028B2894A8CDC1C1C /* LLMNamingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMNamingService.swift; sourceTree = "<group>"; };
+		B8414A6CB9C3CA1AFBDA56F2 /* ScreenshotManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotManager.swift; sourceTree = "<group>"; };
+		C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureOverlayView.swift; sourceTree = "<group>"; };
+		CCCDC6B347DFEF6AEBDE66B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DE3F5B377DB62E887FAA4AAE /* HistoryGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGridView.swift; sourceTree = "<group>"; };
+		E5E6369CA1BBFF9CA67A4812 /* AnnotationWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationWindow.swift; sourceTree = "<group>"; };
+		FC306600E988C644FE04D4D3 /* WindowDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDetector.swift; sourceTree = "<group>"; };
+		FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationCanvasView.swift; sourceTree = "<group>"; };
+		FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSnapApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		139FF32DFDDF7B96A40EC4B5 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				A970A1938FF534D88671F181 /* DraggableThumbnailView.swift */,
+				9C50AF3A60E2C82F717D112C /* FolderPickerView.swift */,
+				DE3F5B377DB62E887FAA4AAE /* HistoryGridView.swift */,
+				26CEF2C4260C0C4576C40427 /* MenuBarView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		1AAE1E3C8585B8487D541C96 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				52B193E8B0F343791D6C217A /* AnnotationShape.swift */,
+				658B106B8CABE816336478E5 /* ScreenshotRecord.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1BFF61A91FD2F41CEC3A9210 = {
+			isa = PBXGroup;
+			children = (
+				FBA9889570494D0E60F4D367 /* QuickSnap */,
+				90CB69801ADD615FFACA49D3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		20F656827264B9C0B57445C2 /* Annotation */ = {
+			isa = PBXGroup;
+			children = (
+				FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */,
+				3EA96F98C295D22D123302F1 /* AnnotationToolbar.swift */,
+				E5E6369CA1BBFF9CA67A4812 /* AnnotationWindow.swift */,
+				4495BB1C285B7B54E0BAB221 /* Tools */,
+			);
+			path = Annotation;
+			sourceTree = "<group>";
+		};
+		4495BB1C285B7B54E0BAB221 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		57FA4E3044DB5E26B34BDB6E /* FloatingPreview */ = {
+			isa = PBXGroup;
+			children = (
+				99B0D6FDCBC59555E778154D /* PinnedScreenshotPanel.swift */,
+			);
+			path = FloatingPreview;
+			sourceTree = "<group>";
+		};
+		8126AB9F5A563F39315BF533 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				83FE7375387D9FE3117C626F /* FolderService.swift */,
+				B185920028B2894A8CDC1C1C /* LLMNamingService.swift */,
+				25824E6D3662DD3A5E7444FB /* StorageService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		90CB69801ADD615FFACA49D3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1DD2796FD98EC11FBDC64481 /* QuickSnap.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		92E468A2C78114CF255B8944 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				3EE57C2C60D786A3519F6417 /* CaptureEngine.swift */,
+				8B74095E7938831D5D8C805D /* CaptureOverlayController.swift */,
+				C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */,
+				458137A283C6B25564178708 /* CaptureOverlayWindow.swift */,
+				AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */,
+				B8414A6CB9C3CA1AFBDA56F2 /* ScreenshotManager.swift */,
+				FC306600E988C644FE04D4D3 /* WindowDetector.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		FBA9889570494D0E60F4D367 /* QuickSnap */ = {
+			isa = PBXGroup;
+			children = (
+				32AF920B5485C1961AAB84D3 /* AppDelegate.swift */,
+				CCCDC6B347DFEF6AEBDE66B9 /* Assets.xcassets */,
+				2E412AF5843E2BCDD86D1651 /* Info.plist */,
+				8838563452DE8E9E6FC23E40 /* QuickSnap.entitlements */,
+				FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */,
+				20F656827264B9C0B57445C2 /* Annotation */,
+				92E468A2C78114CF255B8944 /* Core */,
+				57FA4E3044DB5E26B34BDB6E /* FloatingPreview */,
+				139FF32DFDDF7B96A40EC4B5 /* MenuBar */,
+				1AAE1E3C8585B8487D541C96 /* Models */,
+				8126AB9F5A563F39315BF533 /* Services */,
+			);
+			path = QuickSnap;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2247B717A7F27416207050C0 /* QuickSnap */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF36EC45EFBFE07C0A2A26EF /* Build configuration list for PBXNativeTarget "QuickSnap" */;
+			buildPhases = (
+				0D3F8C5E2427CD3F2C53A82B /* Sources */,
+				C7D3E39D87183AE102442BFB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QuickSnap;
+			packageProductDependencies = (
+			);
+			productName = QuickSnap;
+			productReference = 1DD2796FD98EC11FBDC64481 /* QuickSnap.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		64F710FB76B0EFE925CB200B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 096D377AF08C636E63A4C09B /* Build configuration list for PBXProject "QuickSnap" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1BFF61A91FD2F41CEC3A9210;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 90CB69801ADD615FFACA49D3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2247B717A7F27416207050C0 /* QuickSnap */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C7D3E39D87183AE102442BFB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E58711766A1684A7DFB83A5 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0D3F8C5E2427CD3F2C53A82B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4B790794A715410B9417823 /* AnnotationCanvasView.swift in Sources */,
+				571D7E5774B8B7EBA01A2020 /* AnnotationShape.swift in Sources */,
+				C3E677C804D49CB092FF4177 /* AnnotationToolbar.swift in Sources */,
+				7DE0E770442205A480BF8810 /* AnnotationWindow.swift in Sources */,
+				8EEC3B49601CC1016F550FEC /* AppDelegate.swift in Sources */,
+				6138298AC2F45C78B08CFFC3 /* CaptureEngine.swift in Sources */,
+				CC3D0BD0A7F44A7B22FCBF11 /* CaptureOverlayController.swift in Sources */,
+				81F02963FCF3715E901D80EA /* CaptureOverlayView.swift in Sources */,
+				66738453B07A9F475507F406 /* CaptureOverlayWindow.swift in Sources */,
+				E42496AB9BEC96ADD52E45AF /* DraggableThumbnailView.swift in Sources */,
+				512F385D7272B68980A27091 /* FolderPickerView.swift in Sources */,
+				A4CA39F49C3868EE80CD16B3 /* FolderService.swift in Sources */,
+				E3EC756C087EDB500CCA3812 /* HistoryGridView.swift in Sources */,
+				31D2908FA83FAAEBA7CF3856 /* HotkeyManager.swift in Sources */,
+				EC9BDF32246FFB156CF25F16 /* LLMNamingService.swift in Sources */,
+				67978B77C8BFAC4EDD6F6DBF /* MenuBarView.swift in Sources */,
+				CB858215B68D7BD6984D8A77 /* PinnedScreenshotPanel.swift in Sources */,
+				45D471837C394087723395BB /* QuickSnapApp.swift in Sources */,
+				64F87D381D28419C7F2A5F93 /* ScreenshotManager.swift in Sources */,
+				EE66F0C80A6DFFFEDA2CE827 /* ScreenshotRecord.swift in Sources */,
+				4D536510FAC7FDD8FE85E73A /* StorageService.swift in Sources */,
+				B418BEF058EEF955A175C35C /* WindowDetector.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4324B3C450D458162C66F920 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = QuickSnap/QuickSnap.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = QuickSnap/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dirkwilfling.QuickSnap;
+				PRODUCT_NAME = QuickSnap;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B75A059DFB011467DC9F1957 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = QuickSnap/QuickSnap.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = QuickSnap/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.dirkwilfling.QuickSnap;
+				PRODUCT_NAME = QuickSnap;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E040EB039946CDC2156E3540 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		E07892B69D9F80F57426ACCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		096D377AF08C636E63A4C09B /* Build configuration list for PBXProject "QuickSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E07892B69D9F80F57426ACCA /* Debug */,
+				E040EB039946CDC2156E3540 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AF36EC45EFBFE07C0A2A26EF /* Build configuration list for PBXNativeTarget "QuickSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B75A059DFB011467DC9F1957 /* Debug */,
+				4324B3C450D458162C66F920 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 64F710FB76B0EFE925CB200B /* Project object */;
+}
