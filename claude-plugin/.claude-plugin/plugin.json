@@ -1,0 +1,13 @@
+{
+  "name": "quicksnap-metadata",
+  "version": "1.0.0",
+  "description": "Automatically surfaces AI-generated image descriptions when Claude Code reads PNG/JPG files. Works with any image that has EXIF/TIFF description metadata — written by QuickSnap or any tool that embeds kMDItemDescription.",
+  "author": {
+    "name": "Dirk Wilfling",
+    "url": "https://github.com/wirkling"
+  },
+  "repository": "https://github.com/wirkling/QuickSnap",
+  "license": "MIT",
+  "keywords": ["screenshot", "metadata", "exif", "image", "macos"],
+  "hooks": "./hooks/hooks.json"
+}
