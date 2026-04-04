@@ -7,12 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1B2C3D4E5F60001 /* BurstCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60011 /* BurstCaptureController.swift */; };
-		A1B2C3D4E5F60002 /* BurstIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */; };
-		A1B2C3D4E5F60005 /* StackIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */; };
-		A1B2C3D4E5F60003 /* PostCapturePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60013 /* PostCapturePanel.swift */; };
-		A1B2C3D4E5F60004 /* ImageComparisonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60014 /* ImageComparisonService.swift */; };
-		A1B2C3D4E5F60006 /* AppleIntelligenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60016 /* AppleIntelligenceService.swift */; };
 		0E58711766A1684A7DFB83A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCCDC6B347DFEF6AEBDE66B9 /* Assets.xcassets */; };
 		31D2908FA83FAAEBA7CF3856 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */; };
 		45D471837C394087723395BB /* QuickSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */; };
@@ -39,12 +33,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1B2C3D4E5F60011 /* BurstCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurstCaptureController.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurstIndicatorPanel.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackIndicatorPanel.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60013 /* PostCapturePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCapturePanel.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60014 /* ImageComparisonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageComparisonService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60016 /* AppleIntelligenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceService.swift; sourceTree = "<group>"; };
 		1DD2796FD98EC11FBDC64481 /* QuickSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuickSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		25824E6D3662DD3A5E7444FB /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 		26CEF2C4260C0C4576C40427 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
@@ -123,10 +111,7 @@
 		57FA4E3044DB5E26B34BDB6E /* FloatingPreview */ = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */,
-				A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */,
 				99B0D6FDCBC59555E778154D /* PinnedScreenshotPanel.swift */,
-				A1B2C3D4E5F60013 /* PostCapturePanel.swift */,
 			);
 			path = FloatingPreview;
 			sourceTree = "<group>";
@@ -135,8 +120,6 @@
 			isa = PBXGroup;
 			children = (
 				83FE7375387D9FE3117C626F /* FolderService.swift */,
-				A1B2C3D4E5F60016 /* AppleIntelligenceService.swift */,
-				A1B2C3D4E5F60014 /* ImageComparisonService.swift */,
 				B185920028B2894A8CDC1C1C /* LLMNamingService.swift */,
 				25824E6D3662DD3A5E7444FB /* StorageService.swift */,
 			);
@@ -154,7 +137,6 @@
 		92E468A2C78114CF255B8944 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F60011 /* BurstCaptureController.swift */,
 				3EE57C2C60D786A3519F6417 /* CaptureEngine.swift */,
 				8B74095E7938831D5D8C805D /* CaptureOverlayController.swift */,
 				C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */,
@@ -253,12 +235,6 @@
 			files = (
 				F4B790794A715410B9417823 /* AnnotationCanvasView.swift in Sources */,
 				571D7E5774B8B7EBA01A2020 /* AnnotationShape.swift in Sources */,
-				A1B2C3D4E5F60001 /* BurstCaptureController.swift in Sources */,
-				A1B2C3D4E5F60002 /* BurstIndicatorPanel.swift in Sources */,
-				A1B2C3D4E5F60005 /* StackIndicatorPanel.swift in Sources */,
-				A1B2C3D4E5F60003 /* PostCapturePanel.swift in Sources */,
-				A1B2C3D4E5F60006 /* AppleIntelligenceService.swift in Sources */,
-				A1B2C3D4E5F60004 /* ImageComparisonService.swift in Sources */,
 				C3E677C804D49CB092FF4177 /* AnnotationToolbar.swift in Sources */,
 				7DE0E770442205A480BF8810 /* AnnotationWindow.swift in Sources */,
 				8EEC3B49601CC1016F550FEC /* AppDelegate.swift in Sources */,

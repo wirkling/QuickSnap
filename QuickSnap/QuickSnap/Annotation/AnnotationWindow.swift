@@ -18,6 +18,20 @@ final class AnnotationWindowController {
     /// Called after the annotated image is saved successfully.
     var onSaved: (() -> Void)?
 
+    func close() {
+        onSaved = nil
+        canvasView?.onShapeCompleted = nil
+        canvasView?.onTextRequested = nil
+        canvasView?.onColorSampled = nil
+        canvasView = nil
+        toolbarHostingView = nil
+        if let w = window {
+            w.contentView = nil
+            w.orderOut(nil)
+        }
+        window = nil
+    }
+
     init(image: NSImage, sourceURL: URL) {
         self.sourceURL = sourceURL
         setupWindow(with: image)
@@ -67,6 +81,7 @@ final class AnnotationWindowController {
             defer: false
         )
         window.title = "Annotate — \(sourceURL.lastPathComponent)"
+        window.isReleasedWhenClosed = false
         window.contentView = contentView
         window.center()
         window.makeKeyAndOrderFront(nil)
@@ -141,8 +156,9 @@ final class AnnotationWindowController {
         do {
             try pngData.write(to: sourceURL, options: .atomic)
             print("[QuickSnap] Annotated image saved to: \(sourceURL.path)")
-            onSaved?()
-            window?.close()
+            let callback = onSaved
+            close()
+            callback?()
         } catch {
             let alert = NSAlert()
             alert.messageText = "Save Failed"

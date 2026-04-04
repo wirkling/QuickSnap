@@ -28,6 +28,8 @@ struct SettingsView: View {
     @State private var hasKey: Bool = false
     @State private var showKey: Bool = false
     @State private var selectedTab = 0
+    @State private var selectedProvider: AIProvider = .auto
+    @State private var boostEnabled: Bool = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -43,13 +45,15 @@ struct SettingsView: View {
                 .tabItem { Label("AI Naming", systemImage: "brain") }
                 .tag(2)
         }
-        .frame(width: 450, height: 300)
+        .frame(width: 480, height: 380)
         .onAppear {
             Task {
                 hasKey = await screenshotManager.llmNamingService.hasAPIKey()
                 if hasKey {
                     apiKey = await screenshotManager.llmNamingService.getAPIKey() ?? ""
                 }
+                selectedProvider = await screenshotManager.llmNamingService.selectedProvider
+                boostEnabled = await screenshotManager.llmNamingService.isBoostEnabled
             }
         }
     }
@@ -142,48 +146,76 @@ struct SettingsView: View {
 
     private var apiTab: some View {
         Form {
-            Section("Claude API Key") {
-                HStack {
-                    if showKey {
-                        TextField("sk-ant-...", text: $apiKey)
-                            .textFieldStyle(.roundedBorder)
-                    } else {
-                        SecureField("sk-ant-...", text: $apiKey)
-                            .textFieldStyle(.roundedBorder)
+            Section("AI Provider") {
+                Picker("Provider", selection: $selectedProvider) {
+                    ForEach(AIProvider.allCases, id: \.self) { provider in
+                        Label(provider.displayName, systemImage: provider.icon)
+                            .tag(provider)
                     }
-                    Button(showKey ? "Hide" : "Show") {
-                        showKey.toggle()
-                    }
-                    .frame(width: 50)
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: selectedProvider) {
+                    Task { await screenshotManager.llmNamingService.setProvider(selectedProvider) }
                 }
 
-                HStack {
-                    Button("Save Key") {
-                        Task {
-                            await screenshotManager.llmNamingService.setAPIKey(apiKey)
-                            hasKey = true
-                        }
-                    }
-                    .disabled(apiKey.isEmpty)
-
-                    if hasKey {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                        Text("Key saved in Keychain")
+                switch selectedProvider {
+                case .auto:
+                    Text(hasKey ? "Using Claude (API key detected)" : "Using Apple Intelligence (no API key)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .claude:
+                    if !hasKey {
+                        Label("Claude requires an API key — add one below", systemImage: "exclamationmark.triangle")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.orange)
                     }
+                case .appleIntelligence:
+                    Text("On-device, private, free. Shorter descriptions than Claude.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-
-                Text("Used by Claude Haiku to generate descriptive filenames for your screenshots. Key is stored securely in macOS Keychain.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
-            Section("How It Works") {
-                Text("After each screenshot, QuickSnap sends a compressed JPEG to the Claude API. Claude analyzes the content and returns a short descriptive filename like \"xcode-build-error-dialog\" or \"slack-team-chat\".")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            if selectedProvider != .appleIntelligence {
+                Section("Claude API Key") {
+                    HStack {
+                        if showKey {
+                            TextField("sk-ant-...", text: $apiKey)
+                                .textFieldStyle(.roundedBorder)
+                        } else {
+                            SecureField("sk-ant-...", text: $apiKey)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        Button(showKey ? "Hide" : "Show") {
+                            showKey.toggle()
+                        }
+                        .frame(width: 50)
+                    }
+
+                    HStack {
+                        Button("Save Key") {
+                            Task {
+                                await screenshotManager.llmNamingService.setAPIKey(apiKey)
+                                hasKey = true
+                            }
+                        }
+                        .disabled(apiKey.isEmpty)
+
+                        if hasKey {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("Key saved in Keychain")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section("Boost Mode") {
+                    Text("Use the bolt icon next to any screenshot to re-analyze it with Claude Opus for richer, more detailed descriptions.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding()

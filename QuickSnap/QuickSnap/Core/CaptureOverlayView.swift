@@ -200,6 +200,9 @@ class CaptureOverlayView: NSView {
 
     // MARK: - Right-Click Context Menu
 
+    /// Set this before showing the overlay to add "Start Stack" to the right-click menu.
+    var onStartStack: (() -> Void)?
+
     override func rightMouseDown(with event: NSEvent) {
         let menu = NSMenu()
 
@@ -213,11 +216,21 @@ class CaptureOverlayView: NSView {
         burstItem.state = captureMode == .burst ? .on : .off
         menu.addItem(burstItem)
 
+        menu.addItem(NSMenuItem.separator())
+
+        let stackItem = NSMenuItem(title: "Start Stack (multi-page PDF)", action: #selector(selectStackMode), keyEquivalent: "")
+        stackItem.target = self
+        menu.addItem(stackItem)
+
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }
 
     @objc private func selectSingleMode() { captureMode = .single }
     @objc private func selectBurstMode() { captureMode = .burst }
+    @objc private func selectStackMode() {
+        onStartStack?()
+        completion(.cancelled) // Dismiss the overlay — stack mode takes over
+    }
 
     // MARK: - Capture
 

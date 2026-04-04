@@ -6,30 +6,38 @@ final class PostCapturePanel {
     private var panel: NSPanel?
     private var dismissTimer: Timer?
     private var isHovering = false
-    private let item: ScreenshotItem
+    private let itemID: UUID
+    private let screenshotManager: ScreenshotManager
     private let onAnnotate: () -> Void
     private let onPin: () -> Void
     private let onDismiss: () -> Void
+    private let onNameChanged: ((String) -> Void)?
 
-    init(item: ScreenshotItem, onAnnotate: @escaping () -> Void, onPin: @escaping () -> Void, onDismiss: @escaping () -> Void) {
-        self.item = item
+    init(item: ScreenshotItem, screenshotManager: ScreenshotManager, onAnnotate: @escaping () -> Void, onPin: @escaping () -> Void, onDismiss: @escaping () -> Void, onNameChanged: ((String) -> Void)? = nil) {
+        self.itemID = item.id
+        self.screenshotManager = screenshotManager
         self.onAnnotate = onAnnotate
         self.onPin = onPin
         self.onDismiss = onDismiss
-        setupPanel()
+        self.onNameChanged = onNameChanged
+        setupPanel(initialItem: item)
         startDismissTimer()
     }
 
-    private func setupPanel() {
+    private func setupPanel(initialItem: ScreenshotItem) {
         let content = PostCapturePanelView(
-            item: item,
+            itemID: itemID,
+            screenshotManager: screenshotManager,
+            initialThumbnail: initialItem.thumbnail,
+            initialFileURL: initialItem.fileURL,
             onAnnotate: { [weak self] in self?.onAnnotate(); self?.dismiss() },
             onPin: { [weak self] in self?.onPin(); self?.dismiss() },
             onCopy: { [weak self] in
                 guard let self else { return }
+                let item = self.screenshotManager.history.first { $0.id == self.itemID } ?? initialItem
                 let pb = NSPasteboard.general
                 pb.clearContents()
-                pb.writeObjects([self.item.thumbnail])
+                pb.writeObjects([item.thumbnail])
             },
             onDismiss: { [weak self] in self?.dismiss() }
         )
@@ -115,21 +123,47 @@ class HoverTrackingView: NSView {
 }
 
 struct PostCapturePanelView: View {
-    let item: ScreenshotItem
+    let itemID: UUID
+    @ObservedObject var screenshotManager: ScreenshotManager
+    let initialThumbnail: NSImage
+    let initialFileURL: URL
     let onAnnotate: () -> Void
     let onPin: () -> Void
     let onCopy: () -> Void
     let onDismiss: () -> Void
 
+    private var liveItem: ScreenshotItem? {
+        screenshotManager.lastScreenshot?.id == itemID
+            ? screenshotManager.lastScreenshot
+            : screenshotManager.history.first { $0.id == itemID }
+    }
+
+    private var displayName: String {
+        liveItem?.displayName ?? initialFileURL.deletingPathExtension().lastPathComponent
+    }
+
+    private var thumbnail: NSImage {
+        liveItem?.thumbnail ?? initialThumbnail
+    }
+
+    private var fileURL: URL {
+        liveItem?.fileURL ?? initialFileURL
+    }
+
+    private var isProcessing: Bool {
+        guard let item = liveItem else { return true }
+        return item.llmNamingStatus == .processing || item.llmCompareStatus == .processing
+    }
+
     var body: some View {
         HStack(spacing: 10) {
-            Image(nsImage: item.thumbnail)
+            Image(nsImage: thumbnail)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 80, height: 60)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
-                .draggable(item.fileURL) {
-                    Image(nsImage: item.thumbnail)
+                .draggable(fileURL) {
+                    Image(nsImage: thumbnail)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 60, height: 45)
@@ -138,10 +172,20 @@ struct PostCapturePanelView: View {
                 }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(item.displayName)
-                    .font(.callout.weight(.medium))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    if isProcessing {
+                        ProgressView()
+                            .controlSize(.small)
+                            .colorScheme(.dark)
+                    }
+                    Text(isProcessing ? "Analyzing..." : displayName)
+                        .font(.callout.weight(.medium))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .contentTransition(.numericText())
+                        .animation(.easeInOut(duration: 0.25), value: displayName)
+                        .animation(.easeInOut(duration: 0.25), value: isProcessing)
+                }
 
                 HStack(spacing: 14) {
                     panelButton("pencil.tip", label: "Annotate", action: onAnnotate)

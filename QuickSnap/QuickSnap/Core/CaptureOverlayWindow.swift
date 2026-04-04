@@ -4,7 +4,7 @@ import AppKit
 /// Click = capture window under cursor. Click+drag = capture selected region.
 final class CaptureOverlayWindow {
     let window: NSWindow
-    private let overlayView: CaptureOverlayView
+    let overlayView: CaptureOverlayView
 
     init(screen: NSScreen, completion: @escaping (CaptureResult) -> Void) {
         overlayView = CaptureOverlayView(screenFrame: screen.frame, completion: completion)

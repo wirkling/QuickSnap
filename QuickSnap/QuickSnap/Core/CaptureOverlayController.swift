@@ -12,6 +12,7 @@ enum CaptureResult {
 final class CaptureOverlayController {
     private var windows: [CaptureOverlayWindow] = []
     private let completion: (CaptureResult) -> Void
+    var onStartStack: (() -> Void)?
 
     init(completion: @escaping (CaptureResult) -> Void) {
         self.completion = completion
@@ -23,6 +24,7 @@ final class CaptureOverlayController {
             let window = CaptureOverlayWindow(screen: screen) { [weak self] result in
                 self?.handleResult(result)
             }
+            window.overlayView.onStartStack = onStartStack
             windows.append(window)
         }
     }
