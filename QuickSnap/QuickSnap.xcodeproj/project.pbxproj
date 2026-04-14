@@ -32,10 +32,17 @@
 		CC3D0BD0A7F44A7B22FCBF11 /* CaptureOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B74095E7938831D5D8C805D /* CaptureOverlayController.swift */; };
 		E3EC756C087EDB500CCA3812 /* HistoryGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3F5B377DB62E887FAA4AAE /* HistoryGridView.swift */; };
 		E42496AB9BEC96ADD52E45AF /* DraggableThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A970A1938FF534D88671F181 /* DraggableThumbnailView.swift */; };
-		E5058DD22F7BE0E200697B77 /* PostCapturePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5058DD12F7BE0E200697B77 /* PostCapturePanel.swift */; };
+		E5058DD22F7BE0E200697B77 /* CaptureActionPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5058DD12F7BE0E200697B77 /* CaptureActionPanel.swift */; };
 		EC9BDF32246FFB156CF25F16 /* LLMNamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B185920028B2894A8CDC1C1C /* LLMNamingService.swift */; };
 		EE66F0C80A6DFFFEDA2CE827 /* ScreenshotRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 658B106B8CABE816336478E5 /* ScreenshotRecord.swift */; };
 		F4B790794A715410B9417823 /* AnnotationCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */; };
+		PR00000000000001 /* ProcessRecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000011 /* ProcessRecordingSession.swift */; };
+		PR00000000000002 /* ProcessRecordingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000012 /* ProcessRecordingController.swift */; };
+		PR00000000000003 /* InputEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000013 /* InputEventLogger.swift */; };
+		PR00000000000004 /* ProcessPipelineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000014 /* ProcessPipelineService.swift */; };
+		PR00000000000005 /* CostTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000015 /* CostTracker.swift */; };
+		PR00000000000006 /* ProcessRecordingLogPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000016 /* ProcessRecordingLogPanel.swift */; };
+		PR00000000000007 /* ProcessingProgressPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000017 /* ProcessingProgressPanel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,11 +73,18 @@
 		C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureOverlayView.swift; sourceTree = "<group>"; };
 		CCCDC6B347DFEF6AEBDE66B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE3F5B377DB62E887FAA4AAE /* HistoryGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGridView.swift; sourceTree = "<group>"; };
-		E5058DD12F7BE0E200697B77 /* PostCapturePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCapturePanel.swift; sourceTree = "<group>"; };
+		E5058DD12F7BE0E200697B77 /* CaptureActionPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureActionPanel.swift; sourceTree = "<group>"; };
 		E5E6369CA1BBFF9CA67A4812 /* AnnotationWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationWindow.swift; sourceTree = "<group>"; };
 		FC306600E988C644FE04D4D3 /* WindowDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDetector.swift; sourceTree = "<group>"; };
 		FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationCanvasView.swift; sourceTree = "<group>"; };
 		FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSnapApp.swift; sourceTree = "<group>"; };
+		PR00000000000011 /* ProcessRecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingSession.swift; sourceTree = "<group>"; };
+		PR00000000000012 /* ProcessRecordingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingController.swift; sourceTree = "<group>"; };
+		PR00000000000013 /* InputEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputEventLogger.swift; sourceTree = "<group>"; };
+		PR00000000000014 /* ProcessPipelineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessPipelineService.swift; sourceTree = "<group>"; };
+		PR00000000000015 /* CostTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostTracker.swift; sourceTree = "<group>"; };
+		PR00000000000016 /* ProcessRecordingLogPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingLogPanel.swift; sourceTree = "<group>"; };
+		PR00000000000017 /* ProcessingProgressPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingProgressPanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -125,8 +139,10 @@
 			children = (
 				A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */,
 				A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */,
-				E5058DD12F7BE0E200697B77 /* PostCapturePanel.swift */,
+				E5058DD12F7BE0E200697B77 /* CaptureActionPanel.swift */,
 				99B0D6FDCBC59555E778154D /* PinnedScreenshotPanel.swift */,
+				PR00000000000016 /* ProcessRecordingLogPanel.swift */,
+				PR00000000000017 /* ProcessingProgressPanel.swift */,
 			);
 			path = FloatingPreview;
 			sourceTree = "<group>";
@@ -139,6 +155,8 @@
 				A1B2C3D4E5F60014 /* ImageComparisonService.swift */,
 				B185920028B2894A8CDC1C1C /* LLMNamingService.swift */,
 				25824E6D3662DD3A5E7444FB /* StorageService.swift */,
+				PR00000000000014 /* ProcessPipelineService.swift */,
+				PR00000000000015 /* CostTracker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -151,6 +169,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		PR00000000000020 /* ProcessRecording */ = {
+			isa = PBXGroup;
+			children = (
+				PR00000000000011 /* ProcessRecordingSession.swift */,
+				PR00000000000012 /* ProcessRecordingController.swift */,
+				PR00000000000013 /* InputEventLogger.swift */,
+			);
+			path = ProcessRecording;
+			sourceTree = "<group>";
+		};
 		92E468A2C78114CF255B8944 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -160,6 +188,7 @@
 				C6556A5E5A6A3867B4D58788 /* CaptureOverlayView.swift */,
 				458137A283C6B25564178708 /* CaptureOverlayWindow.swift */,
 				AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */,
+				PR00000000000020 /* ProcessRecording */,
 				B8414A6CB9C3CA1AFBDA56F2 /* ScreenshotManager.swift */,
 				FC306600E988C644FE04D4D3 /* WindowDetector.swift */,
 			);
@@ -264,7 +293,7 @@
 				81F02963FCF3715E901D80EA /* CaptureOverlayView.swift in Sources */,
 				66738453B07A9F475507F406 /* CaptureOverlayWindow.swift in Sources */,
 				E42496AB9BEC96ADD52E45AF /* DraggableThumbnailView.swift in Sources */,
-				E5058DD22F7BE0E200697B77 /* PostCapturePanel.swift in Sources */,
+				E5058DD22F7BE0E200697B77 /* CaptureActionPanel.swift in Sources */,
 				512F385D7272B68980A27091 /* FolderPickerView.swift in Sources */,
 				A4CA39F49C3868EE80CD16B3 /* FolderService.swift in Sources */,
 				E3EC756C087EDB500CCA3812 /* HistoryGridView.swift in Sources */,
@@ -277,6 +306,13 @@
 				EE66F0C80A6DFFFEDA2CE827 /* ScreenshotRecord.swift in Sources */,
 				4D536510FAC7FDD8FE85E73A /* StorageService.swift in Sources */,
 				B418BEF058EEF955A175C35C /* WindowDetector.swift in Sources */,
+				PR00000000000001 /* ProcessRecordingSession.swift in Sources */,
+				PR00000000000002 /* ProcessRecordingController.swift in Sources */,
+				PR00000000000003 /* InputEventLogger.swift in Sources */,
+				PR00000000000004 /* ProcessPipelineService.swift in Sources */,
+				PR00000000000005 /* CostTracker.swift in Sources */,
+				PR00000000000006 /* ProcessRecordingLogPanel.swift in Sources */,
+				PR00000000000007 /* ProcessingProgressPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

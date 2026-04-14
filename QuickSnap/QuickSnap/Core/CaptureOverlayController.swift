@@ -13,6 +13,8 @@ final class CaptureOverlayController {
     private var windows: [CaptureOverlayWindow] = []
     private let completion: (CaptureResult) -> Void
     var onStartStack: (() -> Void)?
+    /// Read the current capture mode from an external source (e.g. CaptureActionPanel).
+    var captureModeProvider: (() -> CaptureOverlayView.CaptureMode)?
 
     init(completion: @escaping (CaptureResult) -> Void) {
         self.completion = completion
@@ -25,6 +27,7 @@ final class CaptureOverlayController {
                 self?.handleResult(result)
             }
             window.overlayView.onStartStack = onStartStack
+            window.overlayView.captureModeProvider = captureModeProvider
             windows.append(window)
         }
     }

@@ -10,13 +10,20 @@ class CaptureOverlayView: NSView {
     private let screenFrame: CGRect
     private let completion: (CaptureResult) -> Void
 
-    // Capture mode (single vs burst)
-    private var captureMode: CaptureMode = .single
-
     enum CaptureMode {
         case single
         case burst
     }
+
+    /// Source of truth for capture mode — usually the CaptureActionPanel.
+    /// Falls back to `.single` if not set.
+    var captureModeProvider: (() -> CaptureMode)?
+
+    /// Local fallback when no provider is attached (e.g. right-click menu usage).
+    private var captureMode: CaptureMode {
+        captureModeProvider?() ?? localCaptureMode
+    }
+    private var localCaptureMode: CaptureMode = .single
 
     // Mouse tracking state
     private var mouseDownPoint: NSPoint?
@@ -225,8 +232,8 @@ class CaptureOverlayView: NSView {
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }
 
-    @objc private func selectSingleMode() { captureMode = .single }
-    @objc private func selectBurstMode() { captureMode = .burst }
+    @objc private func selectSingleMode() { localCaptureMode = .single }
+    @objc private func selectBurstMode() { localCaptureMode = .burst }
     @objc private func selectStackMode() {
         onStartStack?()
         completion(.cancelled) // Dismiss the overlay — stack mode takes over
@@ -303,10 +310,11 @@ class CaptureOverlayView: NSView {
         completion(.burstRegionSelected(cgRect))
     }
 
-    /// Hide all windows at the overlay's window level so none appear in the capture.
+    /// Hide all windows at or above the overlay's window level so none appear in the capture.
+    /// This includes the CaptureActionPanel, which sits one level above the overlay.
     private func hideAllOverlays() {
         guard let myLevel = self.window?.level else { return }
-        for window in NSApp.windows where window.level == myLevel {
+        for window in NSApp.windows where window.level.rawValue >= myLevel.rawValue {
             window.orderOut(nil)
         }
     }

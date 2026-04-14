@@ -28,7 +28,7 @@ enum AIProvider: String, CaseIterable {
 /// Claude model tier for quality control.
 enum ClaudeModelTier: String, CaseIterable {
     case haiku = "claude-haiku-4-5"
-    case sonnet = "claude-sonnet-4-5-20241022"
+    case sonnet = "claude-sonnet-4-5"
     case opus = "claude-opus-4-6"
 
     var displayName: String {

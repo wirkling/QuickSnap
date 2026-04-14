@@ -10,20 +10,38 @@ final class ScreenshotManager: ObservableObject {
     @Published var history: [ScreenshotItem] = []
     @Published var isStackMode: Bool = false
     @Published var stackCount: Int = 0
+    @Published var stackThumbnails: [NSImage] = []
+    @Published var isRecording: Bool = false
 
     private var overlayController: CaptureOverlayController?
     private var annotationController: AnnotationWindowController?
     private var pinnedPanel: PinnedScreenshotPanel?
-    private var postCapturePanel: PostCapturePanel?
     private var burstController: BurstCaptureController?
-    private var stackIndicatorPanel: StackIndicatorPanel?
     private var stackImages: [CGImage] = []
-    private var stackThumbnails: [NSImage] = []
+    private var actionPanel: CaptureActionPanel?
+    var recordingController: ProcessRecordingController?
+    private var recordingLogPanel: ProcessRecordingLogPanel?
+    private var processingPanel: ProcessingProgressPanel?
+    private var recordingUpdateTimer: Timer?
     let llmNamingService = LLMNamingService()
+    let folderService: FolderService
+
+    init(folderService: FolderService) {
+        self.folderService = folderService
+    }
 
     func startCapture() {
         // Dismiss any existing overlay
         overlayController?.dismiss()
+
+        // Show the action panel unless we're already in stack-collecting mode
+        // (stack mode keeps its panel alive across captures).
+        ensureActionPanel()
+        if isStackMode {
+            actionPanel?.showStackCollecting(count: stackCount)
+        } else {
+            actionPanel?.showIdle()
+        }
 
         overlayController = CaptureOverlayController { [weak self] result in
             guard let self else { return }
@@ -32,18 +50,33 @@ final class ScreenshotManager: ObservableObject {
 
             switch result {
             case .captured(let image):
+                // Re-show the panel (hidden by hideAllOverlays) then handle the shot.
+                self.actionPanel?.revealPanel()
                 if self.isStackMode {
                     self.addToStack(image)
                 } else {
                     self.processCapture(image)
                 }
             case .burstRegionSelected(let cgRect):
-                if self.isStackMode {
-                    break // Burst not available during stack mode
-                }
+                if self.isStackMode { break } // Burst not available during stack mode
+                self.actionPanel?.revealPanel()
                 self.startBurstCapture(region: cgRect)
             case .cancelled:
-                break
+                // If user escaped out of the overlay and we're NOT in stack mode,
+                // tear down the action panel too.
+                if !self.isStackMode {
+                    self.actionPanel?.dismiss()
+                    self.actionPanel = nil
+                } else {
+                    self.actionPanel?.revealPanel()
+                }
+            }
+        }
+        overlayController?.captureModeProvider = { [weak self] in
+            guard let self, let panel = self.actionPanel else { return .single }
+            switch panel.state.mode {
+            case .burst: return .burst
+            default: return .single
             }
         }
         overlayController?.onStartStack = { [weak self] in
@@ -52,11 +85,225 @@ final class ScreenshotManager: ObservableObject {
         overlayController?.show()
     }
 
+    // MARK: - Action Panel
+
+    private func ensureActionPanel() {
+        if actionPanel == nil {
+            let panel = CaptureActionPanel(screenshotManager: self, folderService: folderService)
+            panel.onStartStack = { [weak self] in
+                // Enter stack mode but KEEP the overlay up so the very next
+                // click / drag becomes the first page of the stack.
+                // If there's no overlay (user started stack via the menu bar),
+                // open one so they don't have to press ⌘⇧4.
+                guard let self else { return }
+                let hadOverlay = self.overlayController != nil
+                self.startStackMode()
+                if !hadOverlay {
+                    self.startCapture()
+                }
+            }
+            panel.onFinishStack = { [weak self] in self?.finishStack() }
+            panel.onCancelStack = { [weak self] in self?.cancelStack() }
+            panel.onTakeSnap = { [weak self] in
+                // Called from the "Take Snap" button in stack-collecting mode —
+                // equivalent to pressing ⌘⇧4.
+                self?.startCapture()
+            }
+            panel.onRemoveStackPage = { [weak self] index in
+                self?.removeStackPage(at: index)
+            }
+            panel.onCancel = { [weak self] in
+                self?.overlayController?.dismiss()
+                self?.overlayController = nil
+                self?.actionPanel?.dismiss()
+                self?.actionPanel = nil
+            }
+            panel.onAnnotate = { [weak self] id in
+                guard let self, let item = self.findItem(id: id) else { return }
+                self.annotate(item)
+                self.actionPanel?.dismiss()
+                self.actionPanel = nil
+            }
+            panel.onPin = { [weak self] id in
+                guard let self, let item = self.findItem(id: id) else { return }
+                self.pin(item)
+                self.actionPanel?.dismiss()
+                self.actionPanel = nil
+            }
+            panel.onCopy = { [weak self] id in
+                guard let self, let item = self.findItem(id: id) else { return }
+                let pb = NSPasteboard.general
+                pb.clearContents()
+                pb.writeObjects([item.thumbnail])
+            }
+            actionPanel = panel
+        }
+    }
+
+    private func findItem(id: UUID) -> ScreenshotItem? {
+        if lastScreenshot?.id == id { return lastScreenshot }
+        return history.first { $0.id == id }
+    }
+
+    // MARK: - Process Recording
+
+    func startProcessRecording() {
+        guard !isRecording else { return }
+        isRecording = true
+
+        let controller = ProcessRecordingController { [weak self] session in
+            self?.handleRecordingFinished(session)
+        }
+        self.recordingController = controller
+        controller.start()
+
+        // Show recording action panel
+        ensureActionPanel()
+        actionPanel?.onStopRecording = { [weak self] in self?.stopProcessRecording() }
+        actionPanel?.onPauseRecording = { [weak self] in self?.recordingController?.pause() }
+        actionPanel?.onResumeRecording = { [weak self] in self?.recordingController?.resume() }
+        actionPanel?.onAddRecordingNote = { [weak self] text in self?.recordingController?.addNote(text) }
+        actionPanel?.showRecording(elapsed: 0, events: 0, frames: 0)
+
+        // Show live log panel
+        recordingLogPanel = ProcessRecordingLogPanel()
+        recordingLogPanel?.show(session: controller.session)
+
+        // Update action panel with live stats every second
+        recordingUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let session = self.recordingController?.session else { return }
+                self.actionPanel?.showRecording(
+                    elapsed: session.elapsed,
+                    events: session.eventCount,
+                    frames: session.frameCount
+                )
+            }
+        }
+
+        print("[QuickSnap] Process recording started (⌘⇧R to stop)")
+    }
+
+    func stopProcessRecording() {
+        recordingUpdateTimer?.invalidate()
+        recordingUpdateTimer = nil
+        recordingController?.stop()
+    }
+
+    private func handleRecordingFinished(_ session: ProcessRecordingSession) {
+        NSLog("[QuickSnap] Recording finished: %d frames, %d events, %ds", session.frameCount, session.eventCount, Int(session.elapsed))
+        isRecording = false
+        recordingController = nil
+        recordingLogPanel?.dismiss()
+        recordingLogPanel = nil
+        actionPanel?.dismiss()
+        actionPanel = nil
+
+        // Show processing progress panel
+        let costTracker = CostTracker()
+        let progressPanel = ProcessingProgressPanel()
+        progressPanel.show(costTracker: costTracker)
+        self.processingPanel = progressPanel
+
+        Task {
+            let pipeline = ProcessPipelineService(
+                llmNamingService: llmNamingService,
+                sessionFolder: session.sessionFolder,
+                onStageUpdate: { @Sendable stage, message in
+                    Task { @MainActor in
+                        progressPanel.updateStage(stage.rawValue, message: message)
+                    }
+                },
+                onCostRecord: { @Sendable model, inputTokens, outputTokens, stage in
+                    Task { @MainActor in
+                        costTracker.record(model: model, inputTokens: inputTokens, outputTokens: outputTokens, stage: stage)
+                    }
+                }
+            )
+
+            let result = await pipeline.processRecording(session)
+
+            await MainActor.run {
+                if let result {
+                    self.processingPanel?.updateStage("Done", message: "Runbook generated — cost: \(costTracker.formattedCost)")
+                    // Keep progress panel visible for 2s so user sees the final cost
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
+                        await MainActor.run {
+                            self.processingPanel?.dismiss()
+                            self.processingPanel = nil
+                        }
+                    }
+                    self.saveRunbook(result, session: session, costTracker: costTracker)
+                } else {
+                    self.processingPanel?.updateStage("Failed", message: "Check log: \(pipeline.logFileURL.path)")
+                    NSLog("[QuickSnap] Pipeline failed — log at: %@", pipeline.logFileURL.path)
+                    // Keep the error visible for 5s
+                    Task {
+                        try? await Task.sleep(for: .seconds(5))
+                        await MainActor.run {
+                            self.processingPanel?.dismiss()
+                            self.processingPanel = nil
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func saveRunbook(_ result: ProcessPipelineService.PipelineResult, session: ProcessRecordingSession, costTracker: CostTracker) {
+        let fm = FileManager.default
+
+        // Sanitize title for folder name
+        let safeTitle = result.title
+            .replacingOccurrences(of: "[^a-zA-Z0-9\\-_ ]", with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+            .replacingOccurrences(of: " ", with: "-")
+            .lowercased()
+            .prefix(60)
+        let datestamp = Self.timestampString()
+        let folderName = safeTitle.isEmpty ? "recording-\(datestamp)" : "\(datestamp)-\(safeTitle)"
+
+        // Build folder structure: {dest}/Recordings/{date-title}/
+        let recordingsRoot = folderService.effectiveDefault.appendingPathComponent("Recordings")
+        let sessionDir = Self.uniqueURL(for: recordingsRoot.appendingPathComponent(folderName))
+        let imagesDir = sessionDir.appendingPathComponent("images")
+        try? fm.createDirectory(at: imagesDir, withIntermediateDirectories: true)
+
+        // Copy screenshots from temp session folder to images/
+        for screenshot in session.screenshots {
+            let dest = imagesDir.appendingPathComponent(screenshot.fileURL.lastPathComponent)
+            try? fm.copyItem(at: screenshot.fileURL, to: dest)
+        }
+
+        // Append cost summary to runbook
+        var md = result.markdownRunbook
+        md += "\n\n---\n\n"
+        md += "## Processing Cost\n\n"
+        md += "| Model | Input Tokens | Output Tokens | Cost |\n"
+        md += "|-------|-------------|--------------|------|\n"
+        for entry in costTracker.perModelBreakdown {
+            md += "| \(entry.model) | \(entry.inputTokens) | \(entry.outputTokens) | $\(String(format: "%.2f", entry.cost)) |\n"
+        }
+        md += "| **Total** | **\(costTracker.totalInputTokens)** | **\(costTracker.totalOutputTokens)** | **\(costTracker.formattedCost)** |\n"
+
+        // Save runbook markdown
+        let mdURL = sessionDir.appendingPathComponent("\(safeTitle.isEmpty ? "runbook" : String(safeTitle)).md")
+        try? md.write(to: mdURL, atomically: true, encoding: .utf8)
+
+        // Clean up temp session folder
+        try? fm.removeItem(at: session.sessionFolder)
+
+        print("[QuickSnap] Runbook saved: \(sessionDir.path) (cost: \(costTracker.formattedCost))")
+        NSWorkspace.shared.open(mdURL)
+    }
+
     private func processCapture(_ image: CGImage) {
         let timestamp = Self.timestampString()
         let filename = "screenshot-\(timestamp).png"
-        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let fileURL = downloadsURL.appendingPathComponent(filename)
+        let destFolder = actionPanel?.state.destination ?? folderService.effectiveDefault
+        try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
+        let fileURL = destFolder.appendingPathComponent(filename)
 
         // Save to disk
         guard savePNG(image, to: fileURL) else {
@@ -81,18 +328,9 @@ final class ScreenshotManager: ObservableObject {
 
         print("[QuickSnap] Screenshot saved: \(fileURL.path)")
 
-        // Show post-capture floating panel
-        postCapturePanel?.dismiss()
-        postCapturePanel = PostCapturePanel(
-            item: item,
-            screenshotManager: self,
-            onAnnotate: { [weak self] in self?.annotate(item) },
-            onPin: { [weak self] in self?.pin(item) },
-            onDismiss: { [weak self] in self?.postCapturePanel?.dismiss(); self?.postCapturePanel = nil },
-            onNameChanged: { [weak self] newName in
-                self?.updateItemName(itemID: item.id, newName: newName, newURL: item.fileURL.deletingLastPathComponent().appendingPathComponent("\(newName).png"))
-            }
-        )
+        // Expand the action panel into its post-capture (preview + actions) state.
+        ensureActionPanel()
+        actionPanel?.showPostCapture(itemID: item.id)
 
         // Async LLM naming + description
         let thumbnail = item.thumbnail
@@ -105,7 +343,7 @@ final class ScreenshotManager: ObservableObject {
             }
             await MainActor.run {
                 let newFilename = "\(result.filename).png"
-                let newURL = fileURL.deletingLastPathComponent().appendingPathComponent(newFilename)
+                let newURL = Self.uniqueURL(for: fileURL.deletingLastPathComponent().appendingPathComponent(newFilename))
 
                 do {
                     if !result.description.isEmpty,
@@ -151,8 +389,9 @@ final class ScreenshotManager: ObservableObject {
 
     private func processBurstCapture(_ images: [CGImage]) {
         let timestamp = Self.timestampString()
-        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let burstFolder = downloadsURL.appendingPathComponent("burst-\(timestamp)")
+        let destFolder = actionPanel?.state.destination ?? folderService.effectiveDefault
+        try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
+        let burstFolder = destFolder.appendingPathComponent("burst-\(timestamp)")
 
         try? FileManager.default.createDirectory(at: burstFolder, withIntermediateDirectories: true)
 
@@ -187,18 +426,8 @@ final class ScreenshotManager: ObservableObject {
 
         print("[QuickSnap] Burst saved: \(savedURLs.count) images to \(burstFolder.path)")
 
-        // Show post-capture floating panel for burst
-        postCapturePanel?.dismiss()
-        postCapturePanel = PostCapturePanel(
-            item: item,
-            screenshotManager: self,
-            onAnnotate: { [weak self] in self?.annotate(item) },
-            onPin: { [weak self] in self?.pin(item) },
-            onDismiss: { [weak self] in self?.postCapturePanel?.dismiss(); self?.postCapturePanel = nil },
-            onNameChanged: { [weak self] newName in
-                self?.updateItemName(itemID: item.id, newName: newName, newURL: item.fileURL.deletingLastPathComponent().appendingPathComponent(newName))
-            }
-        )
+        ensureActionPanel()
+        actionPanel?.showPostCapture(itemID: item.id)
 
         // LLM naming — send all frames as tiny thumbnails for per-frame narrative
         let allFrameImages = images.map { cgImg in
@@ -210,7 +439,7 @@ final class ScreenshotManager: ObservableObject {
             guard let result = await llmNamingService.generateBurstDescription(frames: allFrameImages, count: count) else { return }
             await MainActor.run {
                 let newFolderName = result.filename
-                let newFolder = burstFolder.deletingLastPathComponent().appendingPathComponent(newFolderName)
+                let newFolder = Self.uniqueURL(for: burstFolder.deletingLastPathComponent().appendingPathComponent(newFolderName))
                 do {
                     try FileManager.default.moveItem(at: burstFolder, to: newFolder)
                     let newURLs = savedURLs.map { url in
@@ -260,10 +489,8 @@ final class ScreenshotManager: ObservableObject {
         stackThumbnails = []
         stackCount = 0
 
-        stackIndicatorPanel = StackIndicatorPanel(
-            onDone: { [weak self] in self?.finishStack() },
-            onCancel: { [weak self] in self?.cancelStack() }
-        )
+        ensureActionPanel()
+        actionPanel?.showStackCollecting(count: 0)
     }
 
     func cancelStack() {
@@ -271,8 +498,8 @@ final class ScreenshotManager: ObservableObject {
         stackImages = []
         stackThumbnails = []
         stackCount = 0
-        stackIndicatorPanel?.dismiss()
-        stackIndicatorPanel = nil
+        actionPanel?.dismiss()
+        actionPanel = nil
     }
 
     private func addToStack(_ image: CGImage) {
@@ -280,10 +507,19 @@ final class ScreenshotManager: ObservableObject {
         let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
         stackThumbnails.append(nsImage)
         stackCount = stackImages.count
-        stackIndicatorPanel?.update(count: stackCount)
+        actionPanel?.showStackCollecting(count: stackCount)
 
         // Copy latest to clipboard
         copyToClipboard(image)
+    }
+
+    /// Remove a page from the in-progress stack (only valid while `isStackMode`).
+    func removeStackPage(at index: Int) {
+        guard isStackMode, stackImages.indices.contains(index) else { return }
+        stackImages.remove(at: index)
+        stackThumbnails.remove(at: index)
+        stackCount = stackImages.count
+        actionPanel?.showStackCollecting(count: stackCount)
     }
 
     func finishStack() {
@@ -295,21 +531,20 @@ final class ScreenshotManager: ObservableObject {
         let images = stackImages
         let thumbnails = stackThumbnails
 
-        // Reset state
+        // Reset state (panel stays alive — it'll transition to postCapture)
         isStackMode = false
         stackImages = []
         stackThumbnails = []
         stackCount = 0
-        stackIndicatorPanel?.dismiss()
-        stackIndicatorPanel = nil
 
         processStackCapture(images, thumbnails: thumbnails)
     }
 
     private func processStackCapture(_ images: [CGImage], thumbnails: [NSImage]) {
         let timestamp = Self.timestampString()
-        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let stackFolder = downloadsURL.appendingPathComponent("stack-\(timestamp)")
+        let destFolder = actionPanel?.state.destination ?? folderService.effectiveDefault
+        try? FileManager.default.createDirectory(at: destFolder, withIntermediateDirectories: true)
+        let stackFolder = destFolder.appendingPathComponent("stack-\(timestamp)")
 
         try? FileManager.default.createDirectory(at: stackFolder, withIntermediateDirectories: true)
 
@@ -350,15 +585,8 @@ final class ScreenshotManager: ObservableObject {
 
         print("[QuickSnap] Stack saved: \(savedURLs.count) pages to \(stackFolder.path)")
 
-        // Show post-capture panel
-        postCapturePanel?.dismiss()
-        postCapturePanel = PostCapturePanel(
-            item: item,
-            screenshotManager: self,
-            onAnnotate: { [weak self] in self?.annotate(item) },
-            onPin: { [weak self] in self?.pin(item) },
-            onDismiss: { [weak self] in self?.postCapturePanel?.dismiss(); self?.postCapturePanel = nil }
-        )
+        ensureActionPanel()
+        actionPanel?.showPostCapture(itemID: item.id)
 
         // LLM naming — send all pages for narrative analysis
         let itemID = item.id
@@ -372,7 +600,7 @@ final class ScreenshotManager: ObservableObject {
             }
             await MainActor.run {
                 let newFolderName = result.filename
-                let newFolder = stackFolder.deletingLastPathComponent().appendingPathComponent(newFolderName)
+                let newFolder = Self.uniqueURL(for: stackFolder.deletingLastPathComponent().appendingPathComponent(newFolderName))
                 do {
                     try FileManager.default.moveItem(at: stackFolder, to: newFolder)
                     let newURLs = savedURLs.map { url in
@@ -589,7 +817,8 @@ final class ScreenshotManager: ObservableObject {
                 await MainActor.run {
                     let currentLiveURL = self.currentFileURL(for: itemID) ?? liveURL
                     let newFilename = "\(result.filename).png"
-                    let newURL = currentLiveURL.deletingLastPathComponent().appendingPathComponent(newFilename)
+                    let proposedURL = currentLiveURL.deletingLastPathComponent().appendingPathComponent(newFilename)
+                    let newURL = (proposedURL == currentLiveURL) ? currentLiveURL : Self.uniqueURL(for: proposedURL)
                     do {
                         if let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
                             _ = self.savePNGWithMetadata(cgImage, to: currentLiveURL, description: result.description)
@@ -655,7 +884,8 @@ final class ScreenshotManager: ObservableObject {
             await MainActor.run {
                 let currentURL = self.currentFileURL(for: itemID) ?? item.fileURL
                 let newFilename = "\(result.filename).png"
-                let newURL = currentURL.deletingLastPathComponent().appendingPathComponent(newFilename)
+                let proposedURL = currentURL.deletingLastPathComponent().appendingPathComponent(newFilename)
+                let newURL = (proposedURL == currentURL) ? currentURL : Self.uniqueURL(for: proposedURL)
 
                 do {
                     if let cgImage = thumbnail.cgImage(forProposedRect: nil, context: nil, hints: nil) {
@@ -841,6 +1071,22 @@ final class ScreenshotManager: ObservableObject {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd-HHmmss"
         return f.string(from: Date())
+    }
+
+    /// Returns `proposed` if it doesn't exist, otherwise appends `-1`, `-2`, … until a free path is found.
+    private static func uniqueURL(for proposed: URL) -> URL {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: proposed.path) else { return proposed }
+        let dir = proposed.deletingLastPathComponent()
+        let ext = proposed.pathExtension
+        let base = proposed.deletingPathExtension().lastPathComponent
+        var n = 1
+        while true {
+            let name = ext.isEmpty ? "\(base)-\(n)" : "\(base)-\(n).\(ext)"
+            let candidate = dir.appendingPathComponent(name)
+            if !fm.fileExists(atPath: candidate.path) { return candidate }
+            n += 1
+        }
     }
 }
 

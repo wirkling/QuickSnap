@@ -35,7 +35,14 @@ struct MenuBarView: View {
                 Text("QuickSnap")
                     .font(.system(size: 13, weight: .semibold))
                 Spacer()
-                if screenshotManager.isStackMode {
+                if screenshotManager.isRecording {
+                    HStack(spacing: 4) {
+                        Circle().fill(.red).frame(width: 8, height: 8)
+                        Text("Recording")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.red)
+                    }
+                } else if screenshotManager.isStackMode {
                     HStack(spacing: 4) {
                         Image(systemName: "square.stack.3d.up.fill")
                             .font(.system(size: 11))
@@ -45,6 +52,9 @@ struct MenuBarView: View {
                             .foregroundStyle(.blue)
                     }
                 } else {
+                    ToolbarButton(icon: "record.circle", label: "Record Process (⌘⇧R)") {
+                        screenshotManager.startProcessRecording()
+                    }
                     ToolbarButton(icon: "square.stack.3d.up", label: "Start Stack") {
                         screenshotManager.startStackMode()
                     }

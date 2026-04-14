@@ -6,13 +6,39 @@ import Foundation
 final class FolderService: ObservableObject {
     @Published var presetFolders: [URL] = []
     @Published var recentFolders: [URL] = []
+    @Published var defaultFolder: URL?
 
     private let presetsKey = "QuickSnap.presetFolders"
     private let recentKey = "QuickSnap.recentFolders"
+    private let defaultFolderKey = "QuickSnap.defaultFolder"
     private let maxRecent = 5
 
     init() {
         loadFromDefaults()
+    }
+
+    /// The folder new screenshots should be saved into. Falls back to `~/Downloads`.
+    var effectiveDefault: URL {
+        defaultFolder ?? FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+    }
+
+    func setDefaultFolder(_ url: URL?) {
+        defaultFolder = url
+        saveToDefaults()
+    }
+
+    /// Opens an NSOpenPanel to let the user pick the default destination folder.
+    func pickDefaultFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.message = "Choose the default folder for new screenshots"
+        panel.prompt = "Set as Default"
+
+        if panel.runModal() == .OK, let url = panel.url {
+            setDefaultFolder(url)
+        }
     }
 
     // MARK: - Move File
@@ -78,6 +104,11 @@ final class FolderService: ObservableObject {
         let defaults = UserDefaults.standard
         defaults.set(presetFolders.map(\.path), forKey: presetsKey)
         defaults.set(recentFolders.map(\.path), forKey: recentKey)
+        if let path = defaultFolder?.path {
+            defaults.set(path, forKey: defaultFolderKey)
+        } else {
+            defaults.removeObject(forKey: defaultFolderKey)
+        }
     }
 
     private func loadFromDefaults() {
@@ -87,6 +118,9 @@ final class FolderService: ObservableObject {
         }
         if let paths = defaults.stringArray(forKey: recentKey) {
             recentFolders = paths.map { URL(fileURLWithPath: $0) }
+        }
+        if let path = defaults.string(forKey: defaultFolderKey) {
+            defaultFolder = URL(fileURLWithPath: path)
         }
     }
 }

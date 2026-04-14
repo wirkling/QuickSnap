@@ -245,11 +245,11 @@ class AnnotationCanvasView: NSView {
     // MARK: - Export
 
     func flattenedImage() -> NSImage? {
-        let size = bounds.size
-        let image = NSImage(size: size)
-        image.lockFocus()
-        draw(bounds)
-        image.unlockFocus()
+        guard let rep = bitmapImageRepForCachingDisplay(in: bounds) else { return nil }
+        rep.size = bounds.size
+        cacheDisplay(in: bounds, to: rep)
+        let image = NSImage(size: bounds.size)
+        image.addRepresentation(rep)
         return image
     }
 }

@@ -67,11 +67,13 @@ final class AnnotationWindowController {
         let contentView = NSView(frame: NSRect(x: 0, y: 0, width: canvasSize.width, height: containerHeight))
 
         canvas.frame = NSRect(x: 0, y: 0, width: canvasSize.width, height: canvasSize.height)
+        canvas.autoresizingMask = [.width, .height]
         contentView.addSubview(canvas)
 
         // SwiftUI toolbar hosted in NSHostingView
         let toolbarView = createToolbarHostingView(width: canvasSize.width, height: toolbarHeight)
         toolbarView.frame = NSRect(x: 0, y: canvasSize.height, width: canvasSize.width, height: toolbarHeight)
+        toolbarView.autoresizingMask = [.width, .minYMargin]
         contentView.addSubview(toolbarView)
 
         let window = NSWindow(
@@ -81,11 +83,18 @@ final class AnnotationWindowController {
             defer: false
         )
         window.title = "Annotate — \(sourceURL.lastPathComponent)"
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
         window.isReleasedWhenClosed = false
         window.contentView = contentView
+        window.contentMinSize = NSSize(width: 520, height: 200)
         window.center()
+
+        // Dismiss any open MenuBarExtra popover so the annotation window doesn't
+        // end up hidden behind it, then activate the app and bring the window front.
+        _ = NSApp.sendAction(#selector(NSMenu.cancelTracking), to: nil, from: nil)
+        NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
-        window.level = .floating
 
         self.window = window
     }
@@ -177,16 +186,19 @@ final class AnnotationWindowController {
                                 set: { [weak self] in
                                     self?.activeTool = $0
                                     self?.canvasView?.activeTool = $0
+                                    self?.updateToolbar()
                                 }),
             activeColor: Binding(get: { [weak self] in self?.activeColor ?? .red },
                                  set: { [weak self] in
                                      self?.activeColor = $0
                                      self?.canvasView?.activeColor = $0
+                                     self?.updateToolbar()
                                  }),
             lineWidth: Binding(get: { [weak self] in self?.lineWidth ?? 3.0 },
                                set: { [weak self] in
                                    self?.lineWidth = $0
                                    self?.canvasView?.lineWidth = $0
+                                   self?.updateToolbar()
                                }),
             onUndo: { [weak self] in self?.undo() },
             onRedo: { [weak self] in self?.redo() },
@@ -209,16 +221,19 @@ final class AnnotationWindowController {
                                 set: { [weak self] in
                                     self?.activeTool = $0
                                     self?.canvasView?.activeTool = $0
+                                    self?.updateToolbar()
                                 }),
             activeColor: Binding(get: { [weak self] in self?.activeColor ?? .red },
                                  set: { [weak self] in
                                      self?.activeColor = $0
                                      self?.canvasView?.activeColor = $0
+                                     self?.updateToolbar()
                                  }),
             lineWidth: Binding(get: { [weak self] in self?.lineWidth ?? 3.0 },
                                set: { [weak self] in
                                    self?.lineWidth = $0
                                    self?.canvasView?.lineWidth = $0
+                                   self?.updateToolbar()
                                }),
             onUndo: { [weak self] in self?.undo() },
             onRedo: { [weak self] in self?.redo() },

@@ -5,13 +5,15 @@ import Carbon
 /// Carbon hot keys work globally without Accessibility permission —
 /// they're the same mechanism Alfred, Spotlight, etc. use.
 ///
-/// Registers both Cmd+Shift+4 and Cmd+Shift+2.
+/// Registers Cmd+Shift+4, Cmd+Shift+2 (capture), and Cmd+Shift+R (recording).
 final class HotkeyManager {
     private var hotKeyRefs: [EventHotKeyRef?] = []
-    private let action: () -> Void
+    private let captureAction: () -> Void
+    private let recordAction: () -> Void
 
-    init(action: @escaping () -> Void) {
-        self.action = action
+    init(captureAction: @escaping () -> Void, recordAction: @escaping () -> Void) {
+        self.captureAction = captureAction
+        self.recordAction = recordAction
     }
 
     deinit {
@@ -32,10 +34,12 @@ final class HotkeyManager {
             nil
         )
 
-        // Register Cmd+Shift+4 (keyCode 21)
+        // Register Cmd+Shift+4 (keyCode 21) — capture
         registerHotKey(keyCode: UInt32(kVK_ANSI_4), id: 1)
-        // Register Cmd+Shift+2 (keyCode 19)
+        // Register Cmd+Shift+2 (keyCode 19) — capture
         registerHotKey(keyCode: UInt32(kVK_ANSI_2), id: 2)
+        // Register Cmd+Shift+R (keyCode 15) — recording toggle
+        registerHotKey(keyCode: UInt32(kVK_ANSI_R), id: 3)
 
         print("[QuickSnap] Hotkeys registered via Carbon (Cmd+Shift+4 and Cmd+Shift+2)")
     }
@@ -49,9 +53,17 @@ final class HotkeyManager {
         hotKeyRefs.removeAll()
     }
 
-    fileprivate func handleHotkey() {
+    fileprivate func handleHotkey(id: UInt32) {
         DispatchQueue.main.async { [weak self] in
-            self?.action()
+            guard let self else { return }
+            switch id {
+            case 1, 2:
+                self.captureAction()
+            case 3:
+                self.recordAction()
+            default:
+                break
+            }
         }
     }
 
@@ -96,7 +108,7 @@ private func carbonHotKeyHandler(
     }
 
     let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
-    manager.handleHotkey()
+    manager.handleHotkey(id: hotKeyID.id)
 
     return noErr
 }

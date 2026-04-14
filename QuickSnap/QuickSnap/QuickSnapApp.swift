@@ -30,6 +30,7 @@ struct SettingsView: View {
     @State private var selectedTab = 0
     @State private var selectedProvider: AIProvider = .auto
     @State private var boostEnabled: Bool = false
+    @State private var autoDismissSeconds: Double = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -47,6 +48,7 @@ struct SettingsView: View {
         }
         .frame(width: 480, height: 380)
         .onAppear {
+            autoDismissSeconds = UserDefaults.standard.double(forKey: "QuickSnap.autoDismissSeconds")
             Task {
                 hasKey = await screenshotManager.llmNamingService.hasAPIKey()
                 if hasKey {
@@ -80,12 +82,53 @@ struct SettingsView: View {
                 HStack {
                     Text("Default Folder")
                     Spacer()
-                    Text("~/Downloads")
+                    Text(displayPath(for: folderService.effectiveDefault))
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                 }
+
+                HStack {
+                    Button("Choose...") {
+                        folderService.pickDefaultFolder()
+                    }
+                    if folderService.defaultFolder != nil {
+                        Button("Reset to Downloads") {
+                            folderService.setDefaultFolder(nil)
+                        }
+                    }
+                }
+
+                Text("New screenshots are saved here. You can override this per capture from the action panel.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Action Panel") {
+                HStack {
+                    Text("Auto-dismiss after")
+                    TextField("", value: $autoDismissSeconds, format: .number)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 60)
+                        .onChange(of: autoDismissSeconds) { _, newValue in
+                            UserDefaults.standard.set(newValue, forKey: "QuickSnap.autoDismissSeconds")
+                        }
+                    Text("seconds")
+                }
+                Text("Set to 0 to keep the panel visible until manually dismissed. Timer pauses while hovering.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding()
+    }
+
+    private func displayPath(for url: URL) -> String {
+        let path = url.path
+        if let range = path.range(of: NSHomeDirectory()) {
+            return "~" + path[range.upperBound...]
+        }
+        return path
     }
 
     private var foldersTab: some View {

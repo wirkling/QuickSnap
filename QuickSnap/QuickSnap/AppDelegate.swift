@@ -3,23 +3,37 @@ import SwiftUI
 
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
-    let screenshotManager = ScreenshotManager()
     let folderService = FolderService()
+    lazy var screenshotManager = ScreenshotManager(folderService: folderService)
     private var hotkeyManager: HotkeyManager?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        hotkeyManager = HotkeyManager { [weak self] in
-            Task { @MainActor in
-                self?.screenshotManager.startCapture()
+        hotkeyManager = HotkeyManager(
+            captureAction: { [weak self] in
+                Task { @MainActor in
+                    self?.screenshotManager.startCapture()
+                }
+            },
+            recordAction: { [weak self] in
+                Task { @MainActor in
+                    self?.toggleRecording()
+                }
             }
-        }
+        )
         hotkeyManager?.register()
 
         // Request Screen Recording permission via ScreenCaptureKit.
-        // SCK manages its own permission prompt and works reliably with Xcode debug builds.
         Task {
             let granted = await CaptureEngine.requestAccess()
             print("[QuickSnap] Screen Recording permission: \(granted ? "GRANTED" : "NOT GRANTED")")
+        }
+    }
+
+    private func toggleRecording() {
+        if screenshotManager.isRecording {
+            screenshotManager.stopProcessRecording()
+        } else {
+            screenshotManager.startProcessRecording()
         }
     }
 }
