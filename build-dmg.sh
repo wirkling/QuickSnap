@@ -17,8 +17,8 @@ echo "==> Building $APP_NAME (Release)..."
   -configuration Release \
   -derivedDataPath "$BUILD_DIR/DerivedData" \
   CODE_SIGN_IDENTITY="-" \
-  CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=YES \
+  CODE_SIGNING_ALLOWED=YES \
   ONLY_ACTIVE_ARCH=NO \
   2>&1 | tail -5
 

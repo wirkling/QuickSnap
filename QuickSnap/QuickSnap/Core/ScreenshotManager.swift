@@ -23,6 +23,8 @@ final class ScreenshotManager: ObservableObject {
     private var recordingLogPanel: ProcessRecordingLogPanel?
     private var processingPanel: ProcessingProgressPanel?
     private var recordingUpdateTimer: Timer?
+    private var backgroundSummarizer: ProcessPipelineService?
+    private var backgroundSummarizeTask: Task<Void, Never>?
     let llmNamingService = LLMNamingService()
     let folderService: FolderService
 
@@ -169,7 +171,15 @@ final class ScreenshotManager: ObservableObject {
         recordingLogPanel = ProcessRecordingLogPanel()
         recordingLogPanel?.show(session: controller.session)
 
-        // Update action panel with live stats every second
+        // Create background summarizer for streaming chunk processing
+        backgroundSummarizer = ProcessPipelineService(
+            llmNamingService: llmNamingService,
+            sessionFolder: controller.session.sessionFolder
+        )
+
+        // Update action panel with live stats every second, and trigger background
+        // chunk summarization when a new batch of 15 frames is ready.
+        let batchSize = 5
         recordingUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self, let session = self.recordingController?.session else { return }
@@ -178,20 +188,52 @@ final class ScreenshotManager: ObservableObject {
                     events: session.eventCount,
                     frames: session.frameCount
                 )
+
+                // Check if a new complete batch is ready for background summarization
+                let framesReady = session.frameCount
+                let alreadySent = session.summarizedFrameCount
+                if framesReady - alreadySent >= batchSize {
+                    self.sendBackgroundChunk(session: session, from: alreadySent, count: batchSize)
+                }
             }
         }
 
         print("[QuickSnap] Process recording started (⌘⇧R to stop)")
     }
 
+    /// Send a batch of screenshots for background LLM summarization during recording.
+    private func sendBackgroundChunk(session: ProcessRecordingSession, from startIndex: Int, count: Int) {
+        let endIndex = min(startIndex + count, session.screenshots.count)
+        let chunk = Array(session.screenshots[startIndex..<endIndex])
+        let events = session.events
+        session.summarizedFrameCount = endIndex
+
+        guard let summarizer = backgroundSummarizer else { return }
+        let chunkNumber = session.precomputedSummaries.count + 1
+        NSLog("[QuickSnap] Background: sending chunk %d (%d frames) for summarization", chunkNumber, chunk.count)
+
+        Task {
+            if let summary = await summarizer.summarizeChunkPublic(chunk, events: events) {
+                await MainActor.run {
+                    session.precomputedSummaries.append(summary)
+                    NSLog("[QuickSnap] Background: chunk %d summarized (%d chars)", chunkNumber, summary.count)
+                }
+            } else {
+                NSLog("[QuickSnap] Background: chunk %d FAILED", chunkNumber)
+            }
+        }
+    }
+
     func stopProcessRecording() {
         recordingUpdateTimer?.invalidate()
         recordingUpdateTimer = nil
+        backgroundSummarizer = nil
         recordingController?.stop()
     }
 
     private func handleRecordingFinished(_ session: ProcessRecordingSession) {
         NSLog("[QuickSnap] Recording finished: %d frames, %d events, %ds", session.frameCount, session.eventCount, Int(session.elapsed))
+        let selectedTemplate = actionPanel?.state.recordingTemplate ?? .runbook
         isRecording = false
         recordingController = nil
         recordingLogPanel?.dismiss()
@@ -208,6 +250,7 @@ final class ScreenshotManager: ObservableObject {
         Task {
             let pipeline = ProcessPipelineService(
                 llmNamingService: llmNamingService,
+                template: selectedTemplate,
                 sessionFolder: session.sessionFolder,
                 onStageUpdate: { @Sendable stage, message in
                     Task { @MainActor in
@@ -225,7 +268,7 @@ final class ScreenshotManager: ObservableObject {
 
             await MainActor.run {
                 if let result {
-                    self.processingPanel?.updateStage("Done", message: "Runbook generated — cost: \(costTracker.formattedCost)")
+                    self.processingPanel?.updateStage("Done", message: "\(selectedTemplate.rawValue) generated — cost: \(costTracker.formattedCost)")
                     // Keep progress panel visible for 2s so user sees the final cost
                     Task {
                         try? await Task.sleep(for: .seconds(2))
@@ -238,9 +281,11 @@ final class ScreenshotManager: ObservableObject {
                 } else {
                     self.processingPanel?.updateStage("Failed", message: "Check log: \(pipeline.logFileURL.path)")
                     NSLog("[QuickSnap] Pipeline failed — log at: %@", pipeline.logFileURL.path)
-                    // Keep the error visible for 5s
+                    // Open the log file so the user can see what went wrong
+                    NSWorkspace.shared.open(pipeline.logFileURL)
+                    // Keep the error visible for 10s
                     Task {
-                        try? await Task.sleep(for: .seconds(5))
+                        try? await Task.sleep(for: .seconds(10))
                         await MainActor.run {
                             self.processingPanel?.dismiss()
                             self.processingPanel = nil
@@ -318,7 +363,7 @@ final class ScreenshotManager: ObservableObject {
         let item = ScreenshotItem(
             id: UUID(),
             fileURL: fileURL,
-            thumbnail: NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height)),
+            thumbnail: Self.retinaImage(from: image),
             createdAt: Date(),
             llmName: nil
         )
@@ -408,7 +453,7 @@ final class ScreenshotManager: ObservableObject {
 
         copyToClipboard(images[0])
 
-        let firstImage = NSImage(cgImage: images[0], size: NSSize(width: images[0].width, height: images[0].height))
+        let firstImage = Self.retinaImage(from: images[0])
 
         let item = ScreenshotItem(
             id: UUID(),
@@ -431,7 +476,7 @@ final class ScreenshotManager: ObservableObject {
 
         // LLM naming — send all frames as tiny thumbnails for per-frame narrative
         let allFrameImages = images.map { cgImg in
-            NSImage(cgImage: cgImg, size: NSSize(width: cgImg.width, height: cgImg.height))
+            Self.retinaImage(from: cgImg)
         }
         let itemID = item.id
         let count = images.count
@@ -504,7 +549,7 @@ final class ScreenshotManager: ObservableObject {
 
     private func addToStack(_ image: CGImage) {
         stackImages.append(image)
-        let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
+        let nsImage = Self.retinaImage(from: image)
         stackThumbnails.append(nsImage)
         stackCount = stackImages.count
         actionPanel?.showStackCollecting(count: stackCount)
@@ -566,7 +611,7 @@ final class ScreenshotManager: ObservableObject {
 
         copyToClipboard(images[0])
 
-        let firstImage = thumbnails.first ?? NSImage(cgImage: images[0], size: NSSize(width: images[0].width, height: images[0].height))
+        let firstImage = thumbnails.first ?? Self.retinaImage(from: images[0])
 
         let item = ScreenshotItem(
             id: UUID(),
@@ -1063,8 +1108,18 @@ final class ScreenshotManager: ObservableObject {
     private func copyToClipboard(_ image: CGImage) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        let nsImage = NSImage(cgImage: image, size: NSSize(width: image.width, height: image.height))
-        pasteboard.writeObjects([nsImage])
+        pasteboard.writeObjects([Self.retinaImage(from: image)])
+    }
+
+    /// Create an NSImage whose point size accounts for Retina scaling,
+    /// so the full pixel data maps to 144 DPI instead of 72 DPI.
+    private static func retinaImage(from cgImage: CGImage) -> NSImage {
+        let scale = NSScreen.main?.backingScaleFactor ?? 2.0
+        let size = NSSize(
+            width: CGFloat(cgImage.width) / scale,
+            height: CGFloat(cgImage.height) / scale
+        )
+        return NSImage(cgImage: cgImage, size: size)
     }
 
     private static func timestampString() -> String {

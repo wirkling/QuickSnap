@@ -6,15 +6,17 @@ import ScreenCaptureKit
 struct CaptureEngine {
 
     /// Request screen recording access. Call early so the user sees the prompt.
+    /// Uses CGPreflightScreenCaptureAccess / CGRequestScreenCaptureAccess instead of
+    /// SCShareableContent to avoid the recurring permission dialog on macOS 15+.
     static func requestAccess() async -> Bool {
-        do {
-            // This triggers the macOS permission prompt if not already granted
-            _ = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        if CGPreflightScreenCaptureAccess() {
+            print("[QuickSnap] Screen recording already granted")
             return true
-        } catch {
-            print("[QuickSnap] Screen recording access denied: \(error)")
-            return false
         }
+        // This shows the system prompt once; user must restart the app after granting.
+        let granted = CGRequestScreenCaptureAccess()
+        print("[QuickSnap] Screen recording request result: \(granted)")
+        return granted
     }
 
     /// Capture a rectangular region of the main display.

@@ -25,6 +25,7 @@ final class CaptureActionState: ObservableObject {
     @Published var historyIndex: Int = 0
     @Published var isHovering: Bool = false
     @Published var isCollapsed: Bool = false
+    @Published var recordingTemplate: RecordingTemplate = .runbook
 
     var accumulatedScrollDelta: CGFloat = 0
     private let scrollThreshold: CGFloat = 2 // every tick = new card
@@ -391,6 +392,7 @@ final class CaptureActionPanel {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isMovableByWindowBackground = true
+        panel.sharingType = .none  // Exclude from all screen captures
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         // Force dark appearance so NSView-backed controls (segmented picker, menus)
         // render with light text on the dark panel background.
@@ -626,6 +628,34 @@ struct CaptureActionPanelView: View {
                 Label("\(events)", systemImage: "list.bullet")
                     .font(.system(size: 10))
                     .foregroundStyle(.white.opacity(0.7))
+
+                divider
+
+                // Template picker
+                Menu {
+                    ForEach(RecordingTemplate.allCases) { tmpl in
+                        Button {
+                            state.recordingTemplate = tmpl
+                        } label: {
+                            Label(tmpl.rawValue, systemImage: tmpl.icon)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: state.recordingTemplate.icon)
+                            .font(.system(size: 10))
+                        Text(state.recordingTemplate.rawValue)
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(.white.opacity(0.8))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(.white.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .help("Output template")
 
                 Spacer(minLength: 4)
 

@@ -55,6 +55,11 @@ final class ProcessRecordingSession: ObservableObject {
     @Published var elapsed: TimeInterval = 0
     @Published var isMicEnabled: Bool = false // Phase 2
 
+    /// Pre-computed chunk summaries from background processing during recording.
+    var precomputedSummaries: [String] = []
+    /// Number of screenshots that have been sent for background summarization.
+    var summarizedFrameCount: Int = 0
+
     /// Folder where this session's screenshots are saved.
     let sessionFolder: URL
 

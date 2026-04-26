@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickSnap — Power-User Screenshots for macOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fcfaf8;
+    --bg2: #fff;
+    --bg3: #f4f1ec;
+    --border: #edeff3;
+    --border2: #dce0e8;
+    --text: #1b2232;
+    --text2: #626d84;
+    --text3: #99a1b3;
+    --accent: #e6594d;
+    --accent2: #1c2b4a;
+    --accent3: #4a6fa5;
+    --success: #16a34a;
+    /* Feature colors */
+    --blue: #3b82f6;
+    --indigo: #6366f1;
+    --teal: #14b8a6;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --orange: #f97316;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  code, .mono {
+    font-family: 'Geist Mono', 'SF Mono', monospace;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg3); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* Nav — glass style */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(252,250,248,0.85);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+  }
+  nav .logo {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text);
+  }
+  nav .logo-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700;
+  }
+  nav .links { display: flex; gap: 28px; align-items: center; }
+  nav a {
+    color: var(--text2); text-decoration: none; font-size: 14px;
+    font-weight: 500; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text); }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; padding: 10px 22px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: all 0.2s;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border2); border-radius: 8px;
+    padding: 10px 22px; font-size: 14px; font-weight: 600;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .btn-outline:hover { border-color: var(--text3); background: var(--bg3); }
+
+  /* Sections */
+  section {
+    max-width: 1280px; margin: 0 auto;
+    padding: 96px 24px 64px;
+  }
+  section:first-of-type { padding-top: 160px; }
+
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .section-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  .section-title {
+    font-size: clamp(32px, 5vw, 48px); font-weight: 700;
+    letter-spacing: -0.025em; line-height: 1.1;
+    margin-bottom: 16px; color: var(--text);
+  }
+  .section-sub {
+    font-size: clamp(16px, 2vw, 18px); color: var(--text2);
+    max-width: 600px; line-height: 1.625;
+  }
+  .section-sub.center { margin: 0 auto; }
+  .text-center { text-align: center; }
+
+  /* Hero */
+  .hero { text-align: center; padding-top: 160px; padding-bottom: 64px; }
+  .hero .section-title {
+    font-size: clamp(40px, 6vw, 64px);
+    color: var(--text);
+  }
+  .hero .section-title .highlight { color: var(--accent); }
+  .hero .section-sub { margin: 0 auto 36px; }
+  .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+
+  .hero-keys {
+    display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .key-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+  }
+  .key-pill kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 26px; height: 26px; padding: 0 5px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 5px;
+    font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--text);
+  }
+  .key-pill span { font-size: 13px; color: var(--text2); font-weight: 500; }
+
+  /* Panel mock */
+  .panel-mock {
+    max-width: 520px; margin: 0 auto;
+    background: #1e1e1e; border-radius: 12px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 24px 48px rgba(27,34,50,0.15), 0 0 0 1px rgba(0,0,0,0.08);
+  }
+  .panel-thumb {
+    width: 48px; height: 34px; border-radius: 4px;
+    background: linear-gradient(135deg, #1a3a1a, #2a5a2a);
+    flex-shrink: 0;
+  }
+  .panel-text { flex: 1; min-width: 0; }
+  .panel-text .name {
+    font-size: 11px; font-weight: 600; color: #f5f5f7;
+    font-family: 'Geist Mono', monospace;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .panel-text .desc {
+    font-size: 10px; color: rgba(255,255,255,0.35);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .panel-text .path { font-size: 9px; color: rgba(255,255,255,0.2); }
+  .panel-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .panel-btn {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: rgba(255,255,255,0.08);
+  }
+  .panel-close {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: rgba(255,255,255,0.5); flex-shrink: 0;
+  }
+
+  /* Feature grid */
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px; margin-top: 48px;
+  }
+  .feature-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    transition: all 0.5s; position: relative;
+  }
+  .feature-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+    box-shadow: 0 8px 24px rgba(27,34,50,0.06);
+  }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 14px;
+  }
+  .feature-card h3 {
+    font-size: 15px; font-weight: 600; margin-bottom: 6px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .feature-card p {
+    font-size: 14px; color: var(--text2); line-height: 1.5;
+  }
+
+  /* Mode sections */
+  .mode-section {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  .mode-section.reverse { direction: rtl; }
+  .mode-section.reverse > * { direction: ltr; }
+
+  .mode-visual { display: flex; flex-direction: column; gap: 12px; }
+  .mode-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.5s;
+  }
+  .mode-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+    box-shadow: 0 8px 24px rgba(27,34,50,0.06);
+  }
+  .mode-card-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .mode-card h4 {
+    font-size: 14px; font-weight: 600; margin-bottom: 2px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .mode-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* AI comparison */
+  .ai-compare {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; margin-top: 48px; max-width: 640px;
+  }
+  .ai-compare.center-grid { margin-left: auto; margin-right: auto; }
+  .ai-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px 24px; text-align: center;
+    transition: all 0.5s;
+  }
+  .ai-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+    box-shadow: 0 8px 24px rgba(27,34,50,0.06);
+  }
+  .ai-card-icon { font-size: 32px; margin-bottom: 12px; color: var(--text2); }
+  .ai-card h3 {
+    font-size: 16px; font-weight: 600; margin-bottom: 14px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .ai-perk {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text2); margin-bottom: 6px; text-align: left;
+  }
+  .ai-perk .check { color: var(--success); font-weight: 700; font-size: 11px; }
+
+  .boost-callout {
+    max-width: 640px; margin: 24px auto 0;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: var(--text2); line-height: 1.5;
+  }
+
+  /* Claude Code */
+  .claude-features {
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 640px; margin: 48px auto 0;
+  }
+  .claude-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.5s;
+  }
+  .claude-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+    box-shadow: 0 8px 24px rgba(27,34,50,0.06);
+  }
+  .claude-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0; color: #fff; font-weight: 600;
+  }
+  .claude-card h4 {
+    font-size: 14px; font-weight: 600; margin-bottom: 2px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .claude-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* CTA */
+  .cta { text-align: center; padding: 80px 24px 96px; }
+  .cta .section-title { margin-bottom: 12px; }
+  .cta .btn-primary {
+    font-size: 16px; padding: 14px 32px; border-radius: 10px; margin-top: 28px;
+  }
+  .cta .note { font-size: 13px; color: var(--text3); margin-top: 14px; }
+
+  /* Divider */
+  .divider {
+    max-width: 1280px; margin: 0 auto;
+    border: none; border-top: 1px solid var(--border);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center; padding: 28px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text3);
+    font-family: 'Geist Mono', monospace;
+  }
+
+  /* Animations */
+  .fade-in {
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .mode-section, .mode-section.reverse {
+      grid-template-columns: 1fr; gap: 32px;
+    }
+    .mode-section.reverse { direction: ltr; }
+    .ai-compare { grid-template-columns: 1fr; }
+    nav .links a:not(.btn-primary) { display: none; }
+    section { padding: 64px 20px 48px; }
+    .hero { padding-top: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="inner">
+    <div class="logo">
+      <div class="logo-icon">Q</div>
+      QuickSnap
+    </div>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#ai">AI</a>
+      <a href="#claude">Claude Code</a>
+      <a href="#download" class="btn-primary">Download</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="section-badge" style="background: rgba(230,89,77,0.08); color: var(--accent);">
+    <span class="dot" style="background: var(--accent);"></span>
+    macOS App
+  </div>
+  <h1 class="section-title">Screenshots,<br><span class="highlight">supercharged.</span></h1>
+  <p class="section-sub center">A power-user screenshot tool that lives in your menu bar. Capture, annotate, stack, burst, and record workflows &mdash; all with keyboard shortcuts.</p>
+
+  <div class="hero-buttons">
+    <a href="#download" class="btn-primary">Download for macOS</a>
+    <a href="https://github.com/wirkling/QuickSnap" class="btn-outline">View on GitHub</a>
+  </div>
+
+  <div class="hero-keys">
+    <div class="key-pill">
+      <kbd>&hairsp;&hairsp;</kbd><kbd>&hairsp;&hairsp;</kbd><kbd>4</kbd>
+      <span>Capture</span>
+    </div>
+    <div class="key-pill">
+      <kbd>&hairsp;&hairsp;</kbd><kbd>&hairsp;&hairsp;</kbd><kbd>R</kbd>
+      <span>Record</span>
+    </div>
+  </div>
+
+  <!-- Action panel mock -->
+  <div class="panel-mock fade-in">
+    <div class="panel-thumb"></div>
+    <div class="panel-text">
+      <div class="name">email-client-invoice-approval-thread</div>
+      <div class="desc">The main email displayed is from Dirk Wilfling regarding "AW: Site Rechnungen..."</div>
+      <div class="path">~/QuickSnaps</div>
+    </div>
+    <div class="panel-actions">
+      <div class="panel-btn"></div>
+      <div class="panel-btn"></div>
+      <div class="panel-btn"></div>
+      <div class="panel-btn"></div>
+    </div>
+    <div class="panel-close">&minus;</div>
+    <div class="panel-close">&times;</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Features: Capture -->
+<section id="features" class="fade-in">
+  <div class="text-center">
+    <div class="section-badge" style="background: rgba(59,130,246,0.08); color: var(--blue);">
+      <span class="dot" style="background: var(--blue);"></span>
+      Capture
+    </div>
+    <h2 class="section-title">Click. Drag. Done.</h2>
+    <p class="section-sub center">Region select, window snap, annotate, and auto-copy to clipboard &mdash; every capture is instantly ready to share.</p>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon" style="background: rgba(59,130,246,0.08); color: var(--blue);">&square;</div>
+      <h3>Region Select</h3>
+      <p>Drag to capture any area of your screen with pixel precision.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: rgba(59,130,246,0.08); color: var(--blue);">&square;</div>
+      <h3>Window Snap</h3>
+      <p>Click any window to capture it instantly, perfectly cropped.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: rgba(59,130,246,0.08); color: var(--blue);">&square;</div>
+      <h3>Markup &amp; Share</h3>
+      <p>Annotate with arrows, boxes, and text before sharing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background: rgba(59,130,246,0.08); color: var(--blue);">&square;</div>
+      <h3>Auto-Copy</h3>
+      <p>Every capture lands on your clipboard automatically. Just paste.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- StackSnap -->
+<section class="fade-in">
+  <div class="mode-section">
+    <div>
+      <div class="section-badge" style="background: rgba(99,102,241,0.08); color: var(--indigo);">
+        <span class="dot" style="background: var(--indigo);"></span>
+        StackSnap
+      </div>
+      <h2 class="section-title">Multi-page<br>to PDF.</h2>
+      <p class="section-sub">Capture multiple regions and merge them into a single PDF. Perfect for multi-step forms, long pages, or documentation.</p>
+    </div>
+    <div class="mode-visual">
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(99,102,241,0.08); color: var(--indigo);">1</div>
+        <div><h4>Stack Mode</h4><p>Select the stack icon in the action panel to start.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(99,102,241,0.08); color: var(--indigo);">2</div>
+        <div><h4>Snap Pages</h4><p>Capture each page with a click or keyboard shortcut.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(99,102,241,0.08); color: var(--indigo);">3</div>
+        <div><h4>Finish</h4><p>Click Finish to merge everything into a single PDF file.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- BurstSnap -->
+<section class="fade-in">
+  <div class="mode-section reverse">
+    <div>
+      <div class="section-badge" style="background: rgba(20,184,166,0.08); color: var(--teal);">
+        <span class="dot" style="background: var(--teal);"></span>
+        BurstSnap
+      </div>
+      <h2 class="section-title">Hands-free<br>time-lapse.</h2>
+      <p class="section-sub">Select a region once and QuickSnap captures it every 2 seconds. Monitor dashboards, track progress, or catch fleeting UI states.</p>
+    </div>
+    <div class="mode-visual">
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(20,184,166,0.08); color: var(--teal);">&bull;</div>
+        <div><h4>Timed Captures</h4><p>Auto-captures keep going until you stop them.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(20,184,166,0.08); color: var(--teal);">&bull;</div>
+        <div><h4>Same Region</h4><p>Every capture uses the exact same area for pixel-perfect consistency.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(20,184,166,0.08); color: var(--teal);">&bull;</div>
+        <div><h4>Monitor</h4><p>Track dashboards, builds, or deployments over time.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- RecordSnap -->
+<section class="fade-in">
+  <div class="mode-section">
+    <div>
+      <div class="section-badge" style="background: rgba(239,68,68,0.08); color: var(--red);">
+        <span class="dot" style="background: var(--red);"></span>
+        RecordSnap
+      </div>
+      <h2 class="section-title">Record.<br>AI writes the docs.</h2>
+      <p class="section-sub">Record your workflow end-to-end. QuickSnap captures screenshots on every click and app switch, logs keyboard shortcuts, and sends it all through a multi-stage AI pipeline that generates a step-by-step Markdown runbook.</p>
+      <div style="margin-top: 20px;">
+        <div class="key-pill">
+          <kbd>&hairsp;&hairsp;</kbd><kbd>&hairsp;&hairsp;</kbd><kbd>R</kbd>
+          <span>Start / Stop</span>
+        </div>
+      </div>
+    </div>
+    <div class="mode-visual">
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(239,68,68,0.08); color: var(--red);">&bull;</div>
+        <div><h4>Smart Captures</h4><p>Screenshots triggered on clicks, app switches, and visual changes.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(239,68,68,0.08); color: var(--red);">&bull;</div>
+        <div><h4>Input Logging</h4><p>Records keyboard shortcuts and clipboard activity with timestamps.</p></div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-icon" style="background: rgba(239,68,68,0.08); color: var(--red);">&bull;</div>
+        <div><h4>AI Runbook</h4><p>Generates a structured Markdown document with steps, apps, and troubleshooting.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- AI Naming -->
+<section id="ai" class="fade-in">
+  <div class="text-center">
+    <div class="section-badge" style="background: rgba(168,85,247,0.08); color: var(--purple);">
+      <span class="dot" style="background: var(--purple);"></span>
+      AI-Powered
+    </div>
+    <h2 class="section-title">Smart naming.<br>Rich context.</h2>
+    <p class="section-sub center">Every screenshot is analyzed for context &mdash; generating descriptive filenames and rich metadata that AI tools can use.</p>
+  </div>
+
+  <div class="ai-compare center-grid">
+    <div class="ai-card">
+      <div class="ai-card-icon">&nbsp;</div>
+      <h3>Apple Intelligence</h3>
+      <div class="ai-perk"><span class="check">&check;</span> On-device &amp; private</div>
+      <div class="ai-perk"><span class="check">&check;</span> Free, no setup</div>
+      <div class="ai-perk"><span class="check">&check;</span> Concise names</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-icon">&nbsp;</div>
+      <h3>Claude API</h3>
+      <div class="ai-perk"><span class="check">&check;</span> Deep context analysis</div>
+      <div class="ai-perk"><span class="check">&check;</span> Detailed descriptions</div>
+      <div class="ai-perk"><span class="check">&check;</span> Metadata for AI tools</div>
+    </div>
+  </div>
+
+  <div class="boost-callout">
+    <span style="color: var(--purple); font-size: 16px; flex-shrink: 0;">&#9889;</span>
+    <span>Use <strong>Boost</strong> to re-analyze any screenshot with Claude Opus for the richest detail &mdash; on demand, so you save tokens on everything else.</span>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Claude Code -->
+<section id="claude" class="fade-in">
+  <div class="text-center">
+    <div class="section-badge" style="background: rgba(249,115,22,0.08); color: var(--orange);">
+      <span class="dot" style="background: var(--orange);"></span>
+      One More Thing
+    </div>
+    <h2 class="section-title">Built for<br>Claude Code.</h2>
+    <p class="section-sub center">Every screenshot carries embedded metadata &mdash; app name, window title, coordinates, and AI-generated context. Paste it into Claude Code and it just knows.</p>
+  </div>
+
+  <div class="claude-features">
+    <div class="claude-card">
+      <div class="claude-icon" style="background: var(--orange);">&gt;_</div>
+      <div>
+        <h4>Claude Code Integration</h4>
+        <p>Paste a screenshot into a Claude Code session &mdash; the embedded metadata gives Claude full context about what you're looking at.</p>
+      </div>
+    </div>
+    <div class="claude-card">
+      <div class="claude-icon" style="background: var(--accent);">&#9889;</div>
+      <div>
+        <h4>Supercharged Debugging</h4>
+        <p>"Fix the bug shown in this screenshot" just works &mdash; Claude knows the app, the window, and the exact region.</p>
+      </div>
+    </div>
+    <div class="claude-card">
+      <div class="claude-icon" style="background: var(--accent2);">&#8645;</div>
+      <div>
+        <h4>Install the Skill</h4>
+        <p>Search for <strong>QuickSnap</strong> in the Claude Code skill/plugin marketplace to unlock full integration.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="download" class="cta fade-in">
+  <h2 class="section-title">Ready to snap?</h2>
+  <p class="section-sub center">Download QuickSnap and take control of your screenshots.</p>
+  <a href="https://github.com/wirkling/QuickSnap/releases" class="btn-primary">Download for macOS</a>
+  <p class="note">Requires macOS 14 or later. Free and open source.</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 Dirk Wilfling &mdash; Built with care in Munich.</p>
+</footer>
+
+<!-- Scroll fade-in -->
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

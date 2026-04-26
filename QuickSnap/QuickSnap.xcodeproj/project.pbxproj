@@ -22,8 +22,8 @@
 		8EEC3B49601CC1016F550FEC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AF920B5485C1961AAB84D3 /* AppDelegate.swift */; };
 		A1B2C3D4E5F60001 /* BurstCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60011 /* BurstCaptureController.swift */; };
 		A1B2C3D4E5F60002 /* BurstIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */; };
-		A1B2C3D4E5F60005 /* StackIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */; };
 		A1B2C3D4E5F60004 /* ImageComparisonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60014 /* ImageComparisonService.swift */; };
+		A1B2C3D4E5F60005 /* StackIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */; };
 		A1B2C3D4E5F60006 /* AppleIntelligenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60016 /* AppleIntelligenceService.swift */; };
 		A4CA39F49C3868EE80CD16B3 /* FolderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FE7375387D9FE3117C626F /* FolderService.swift */; };
 		B418BEF058EEF955A175C35C /* WindowDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC306600E988C644FE04D4D3 /* WindowDetector.swift */; };
@@ -36,6 +36,7 @@
 		EC9BDF32246FFB156CF25F16 /* LLMNamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B185920028B2894A8CDC1C1C /* LLMNamingService.swift */; };
 		EE66F0C80A6DFFFEDA2CE827 /* ScreenshotRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 658B106B8CABE816336478E5 /* ScreenshotRecord.swift */; };
 		F4B790794A715410B9417823 /* AnnotationCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */; };
+		OB00000000000001 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = OB00000000000011 /* OnboardingWindow.swift */; };
 		PR00000000000001 /* ProcessRecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000011 /* ProcessRecordingSession.swift */; };
 		PR00000000000002 /* ProcessRecordingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000012 /* ProcessRecordingController.swift */; };
 		PR00000000000003 /* InputEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000013 /* InputEventLogger.swift */; };
@@ -63,8 +64,8 @@
 		9C50AF3A60E2C82F717D112C /* FolderPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderPickerView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60011 /* BurstCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurstCaptureController.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60012 /* BurstIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurstIndicatorPanel.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackIndicatorPanel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60014 /* ImageComparisonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageComparisonService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60015 /* StackIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackIndicatorPanel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60016 /* AppleIntelligenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceService.swift; sourceTree = "<group>"; };
 		A970A1938FF534D88671F181 /* DraggableThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableThumbnailView.swift; sourceTree = "<group>"; };
 		AB343CECAD1B7DA95F222DF8 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 		FC306600E988C644FE04D4D3 /* WindowDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowDetector.swift; sourceTree = "<group>"; };
 		FC5C98E07F112446F4101EC8 /* AnnotationCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationCanvasView.swift; sourceTree = "<group>"; };
 		FD74050B0F2B6D813EFEF544 /* QuickSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSnapApp.swift; sourceTree = "<group>"; };
+		OB00000000000011 /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		PR00000000000011 /* ProcessRecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingSession.swift; sourceTree = "<group>"; };
 		PR00000000000012 /* ProcessRecordingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingController.swift; sourceTree = "<group>"; };
 		PR00000000000013 /* InputEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputEventLogger.swift; sourceTree = "<group>"; };
@@ -169,16 +171,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		PR00000000000020 /* ProcessRecording */ = {
-			isa = PBXGroup;
-			children = (
-				PR00000000000011 /* ProcessRecordingSession.swift */,
-				PR00000000000012 /* ProcessRecordingController.swift */,
-				PR00000000000013 /* InputEventLogger.swift */,
-			);
-			path = ProcessRecording;
-			sourceTree = "<group>";
-		};
 		92E468A2C78114CF255B8944 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -208,9 +200,28 @@
 				57FA4E3044DB5E26B34BDB6E /* FloatingPreview */,
 				139FF32DFDDF7B96A40EC4B5 /* MenuBar */,
 				1AAE1E3C8585B8487D541C96 /* Models */,
+				OB00000000000020 /* Onboarding */,
 				8126AB9F5A563F39315BF533 /* Services */,
 			);
 			path = QuickSnap;
+			sourceTree = "<group>";
+		};
+		OB00000000000020 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				OB00000000000011 /* OnboardingWindow.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		PR00000000000020 /* ProcessRecording */ = {
+			isa = PBXGroup;
+			children = (
+				PR00000000000011 /* ProcessRecordingSession.swift */,
+				PR00000000000012 /* ProcessRecordingController.swift */,
+				PR00000000000013 /* InputEventLogger.swift */,
+			);
+			path = ProcessRecording;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,7 +252,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2630;
 			};
 			buildConfigurationList = 096D377AF08C636E63A4C09B /* Build configuration list for PBXProject "QuickSnap" */;
 			developmentRegion = en;
@@ -313,6 +324,7 @@
 				PR00000000000005 /* CostTracker.swift in Sources */,
 				PR00000000000006 /* ProcessRecordingLogPanel.swift in Sources */,
 				PR00000000000007 /* ProcessingProgressPanel.swift in Sources */,
+				OB00000000000001 /* OnboardingWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,8 +336,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = QuickSnap/QuickSnap.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = X4YF9EGMYB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = QuickSnap/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -334,6 +350,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.dirkwilfling.QuickSnap;
 				PRODUCT_NAME = QuickSnap;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -343,8 +360,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = QuickSnap/QuickSnap.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = X4YF9EGMYB;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = QuickSnap/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -353,6 +374,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.dirkwilfling.QuickSnap;
 				PRODUCT_NAME = QuickSnap;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -391,9 +413,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -407,6 +431,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
@@ -447,9 +472,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -470,6 +497,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;

@@ -29,6 +29,7 @@ final class ProcessRecordingLogPanel {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isMovableByWindowBackground = true
+        panel.sharingType = .none  // Exclude from all screen captures
         panel.collectionBehavior = [.canJoinAllSpaces]
         panel.appearance = NSAppearance(named: .darkAqua)
         panel.contentView = hosting
