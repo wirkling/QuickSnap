@@ -31,6 +31,7 @@ struct SettingsView: View {
     @State private var selectedProvider: AIProvider = .auto
     @State private var boostEnabled: Bool = false
     @State private var autoDismissSeconds: Double = 0
+    @State private var transcriptFilterEnabled: Bool = true
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -49,6 +50,7 @@ struct SettingsView: View {
         .frame(width: 480, height: 380)
         .onAppear {
             autoDismissSeconds = UserDefaults.standard.double(forKey: "QuickSnap.autoDismissSeconds")
+            transcriptFilterEnabled = UserDefaults.standard.object(forKey: "QuickSnap.transcriptFilterEnabled") as? Bool ?? true
             Task {
                 hasKey = await screenshotManager.llmNamingService.hasAPIKey()
                 if hasKey {
@@ -116,6 +118,16 @@ struct SettingsView: View {
                     Text("seconds")
                 }
                 Text("Set to 0 to keep the panel visible until manually dismissed. Timer pauses while hovering.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Process Recording") {
+                Toggle("Filter mic noise from transcripts", isOn: $transcriptFilterEnabled)
+                    .onChange(of: transcriptFilterEnabled) { _, newValue in
+                        UserDefaults.standard.set(newValue, forKey: "QuickSnap.transcriptFilterEnabled")
+                    }
+                Text("Runs a small LLM pre-pass that drops transcript lines unrelated to the on-screen workflow (background podcasts, chitchat, ambient noise). Off keeps the raw transcript verbatim.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

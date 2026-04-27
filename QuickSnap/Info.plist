@@ -22,5 +22,9 @@
     <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright 2026 Dirk Wilfling. All rights reserved.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>QuickSnap uses the microphone during process recordings to capture spoken context alongside your screenshots. The audio is transcribed on-device — recordings are not sent anywhere unless you enable an LLM provider.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>QuickSnap transcribes your voice during process recordings so the generated runbook, walkthrough, bug report, or QA report can include what you said. Transcription runs on-device when supported.</string>
 </dict>
 </plist>

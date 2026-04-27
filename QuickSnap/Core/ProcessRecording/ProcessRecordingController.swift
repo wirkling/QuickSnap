@@ -11,6 +11,7 @@ final class ProcessRecordingController: ObservableObject {
     private var diffTimer: Timer?
     private var elapsedTimer: Timer?
     private var inputEventLogger: InputEventLogger?
+    private var micService: MicTranscriptionService?
     private var lastCapturedImage: NSImage?
     private var isCapturing = false // guard against re-entrancy
 
@@ -23,8 +24,12 @@ final class ProcessRecordingController: ObservableObject {
 
     // MARK: - Lifecycle
 
-    func start() {
+    func start(micEnabled: Bool = false, micDeviceUID: String? = nil) {
         NSLog("[QuickSnap] Process recording started — \(session.sessionFolder.path)")
+        session.isMicEnabled = micEnabled
+        if micEnabled {
+            startMicTranscription(deviceUID: micDeviceUID)
+        }
 
         // Input event logger
         inputEventLogger = InputEventLogger(sessionStart: session.startedAt) { [weak self] kind, elapsed in
@@ -88,9 +93,42 @@ final class ProcessRecordingController: ObservableObject {
 
     func stop() {
         tearDown()
+        persistTranscript()
         session.isRecording = false
         NSLog("[QuickSnap] Recording stopped: \(session.frameCount) frames, \(session.eventCount) events, \(formatElapsed(session.elapsed))")
         onStop(session)
+    }
+
+    // MARK: - Mic transcription
+
+    private func startMicTranscription(deviceUID: String?) {
+        let service = MicTranscriptionService(sessionStart: session.startedAt)
+        service.onSegment = { [weak self] segment in
+            guard let self else { return }
+            self.session.transcriptSegments.append(segment)
+            self.session.events.append(.transcript(timestamp: segment.timestamp, text: segment.text))
+            self.session.lastTranscriptText = segment.text
+            NSLog("[QuickSnap] Transcript [%.1fs]: %@", segment.timestamp, segment.text)
+        }
+        do {
+            try service.start(deviceUID: deviceUID)
+            session.micDeviceName = service.activeDeviceName
+            micService = service
+        } catch {
+            NSLog("[QuickSnap] Mic transcription failed to start: %@", String(describing: error))
+            session.isMicEnabled = false
+        }
+    }
+
+    private func persistTranscript() {
+        guard !session.transcriptSegments.isEmpty else { return }
+        let url = session.sessionFolder.appendingPathComponent("transcript.json")
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        if let data = try? encoder.encode(session.transcriptSegments) {
+            try? data.write(to: url)
+            NSLog("[QuickSnap] Transcript saved: %d segments → %@", session.transcriptSegments.count, url.path)
+        }
     }
 
     func addNote(_ text: String) {
@@ -211,6 +249,8 @@ final class ProcessRecordingController: ObservableObject {
         elapsedTimer = nil
         inputEventLogger?.stop()
         inputEventLogger = nil
+        micService?.stop()
+        micService = nil
     }
 
     private func formatElapsed(_ seconds: TimeInterval) -> String {

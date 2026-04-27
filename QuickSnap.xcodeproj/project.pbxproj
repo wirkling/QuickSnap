@@ -40,6 +40,8 @@
 		PR00000000000001 /* ProcessRecordingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000011 /* ProcessRecordingSession.swift */; };
 		PR00000000000002 /* ProcessRecordingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000012 /* ProcessRecordingController.swift */; };
 		PR00000000000003 /* InputEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000013 /* InputEventLogger.swift */; };
+		PR00000000000008 /* MicTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000018 /* MicTranscriptionService.swift */; };
+		PR00000000000009 /* AudioInputs.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000019 /* AudioInputs.swift */; };
 		PR00000000000004 /* ProcessPipelineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000014 /* ProcessPipelineService.swift */; };
 		PR00000000000005 /* CostTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000015 /* CostTracker.swift */; };
 		PR00000000000006 /* ProcessRecordingLogPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = PR00000000000016 /* ProcessRecordingLogPanel.swift */; };
@@ -83,6 +85,8 @@
 		PR00000000000011 /* ProcessRecordingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingSession.swift; sourceTree = "<group>"; };
 		PR00000000000012 /* ProcessRecordingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingController.swift; sourceTree = "<group>"; };
 		PR00000000000013 /* InputEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputEventLogger.swift; sourceTree = "<group>"; };
+		PR00000000000018 /* MicTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicTranscriptionService.swift; sourceTree = "<group>"; };
+		PR00000000000019 /* AudioInputs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputs.swift; sourceTree = "<group>"; };
 		PR00000000000014 /* ProcessPipelineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessPipelineService.swift; sourceTree = "<group>"; };
 		PR00000000000015 /* CostTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CostTracker.swift; sourceTree = "<group>"; };
 		PR00000000000016 /* ProcessRecordingLogPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRecordingLogPanel.swift; sourceTree = "<group>"; };
@@ -220,6 +224,8 @@
 				PR00000000000011 /* ProcessRecordingSession.swift */,
 				PR00000000000012 /* ProcessRecordingController.swift */,
 				PR00000000000013 /* InputEventLogger.swift */,
+				PR00000000000018 /* MicTranscriptionService.swift */,
+				PR00000000000019 /* AudioInputs.swift */,
 			);
 			path = ProcessRecording;
 			sourceTree = "<group>";
@@ -320,6 +326,8 @@
 				PR00000000000001 /* ProcessRecordingSession.swift in Sources */,
 				PR00000000000002 /* ProcessRecordingController.swift in Sources */,
 				PR00000000000003 /* InputEventLogger.swift in Sources */,
+				PR00000000000008 /* MicTranscriptionService.swift in Sources */,
+				PR00000000000009 /* AudioInputs.swift in Sources */,
 				PR00000000000004 /* ProcessPipelineService.swift in Sources */,
 				PR00000000000005 /* CostTracker.swift in Sources */,
 				PR00000000000006 /* ProcessRecordingLogPanel.swift in Sources */,

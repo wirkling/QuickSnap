@@ -22,12 +22,14 @@ enum RecordingEvent {
                     appName: String?, windowTitle: String?)
     case inputEvent(timestamp: TimeInterval, kind: InputEventKind)
     case userNote(timestamp: TimeInterval, text: String)
+    case transcript(timestamp: TimeInterval, text: String)
 
     var timestamp: TimeInterval {
         switch self {
         case .screenshot(_, let t, _, _, _): return t
         case .inputEvent(let t, _): return t
         case .userNote(let t, _): return t
+        case .transcript(let t, _): return t
         }
     }
 }
@@ -53,7 +55,14 @@ final class ProcessRecordingSession: ObservableObject {
     @Published var isRecording: Bool = true
     @Published var isPaused: Bool = false
     @Published var elapsed: TimeInterval = 0
-    @Published var isMicEnabled: Bool = false // Phase 2
+    @Published var isMicEnabled: Bool = false
+    /// Name of the active input device, set after the recognizer starts. Surfaced in the log panel.
+    @Published var micDeviceName: String?
+    /// Most recently transcribed phrase, surfaced live in the action panel chip.
+    @Published var lastTranscriptText: String = ""
+
+    /// Live mic transcript segments. Also re-projected as `.transcript` entries in `events`.
+    @Published var transcriptSegments: [MicTranscriptionService.Segment] = []
 
     /// Pre-computed chunk summaries from background processing during recording.
     var precomputedSummaries: [String] = []

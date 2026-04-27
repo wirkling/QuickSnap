@@ -29,7 +29,6 @@ final class ProcessRecordingLogPanel {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isMovableByWindowBackground = true
-        panel.sharingType = .none  // Exclude from all screen captures
         panel.collectionBehavior = [.canJoinAllSpaces]
         panel.appearance = NSAppearance(named: .darkAqua)
         panel.contentView = hosting
@@ -75,6 +74,23 @@ struct ProcessRecordingLogView: View {
             .background(.white.opacity(0.05))
 
             Divider().opacity(0.3)
+
+            // Mic state banner — shows the bound input device when transcription is on
+            if session.isMicEnabled {
+                HStack(spacing: 6) {
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.green)
+                    Text("Listening to \(session.micDeviceName ?? "default input") · \(session.transcriptSegments.count) phrase\(session.transcriptSegments.count == 1 ? "" : "s")")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white.opacity(0.7))
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color.green.opacity(0.08))
+                Divider().opacity(0.3)
+            }
 
             // Scrolling log
             ScrollViewReader { proxy in
@@ -146,6 +162,7 @@ struct ProcessRecordingLogView: View {
             case .clipboardChange: return "📋"
             }
         case .userNote: return "📝"
+        case .transcript: return "🎙️"
         }
     }
 
@@ -163,6 +180,8 @@ struct ProcessRecordingLogView: View {
                 return String(preview.prefix(60))
             }
         case .userNote(_, let text):
+            return text
+        case .transcript(_, let text):
             return text
         }
     }

@@ -6,6 +6,7 @@ enum RecordingTemplate: String, CaseIterable, Identifiable {
     case runbook = "Runbook"
     case uxWalkthrough = "UX Walkthrough"
     case bugReport = "Bug Report"
+    case qaReport = "QA Report"
 
     var id: String { rawValue }
 
@@ -14,6 +15,7 @@ enum RecordingTemplate: String, CaseIterable, Identifiable {
         case .runbook:       return "list.clipboard"
         case .uxWalkthrough: return "hand.tap"
         case .bugReport:     return "ladybug"
+        case .qaReport:      return "checklist"
         }
     }
 
@@ -22,6 +24,7 @@ enum RecordingTemplate: String, CaseIterable, Identifiable {
         case .runbook:       return "Step-by-step process documentation"
         case .uxWalkthrough: return "User experience narrative"
         case .bugReport:     return "Steps to reproduce a bug"
+        case .qaReport:      return "Test session: cases, results, bugs"
         }
     }
 }
@@ -85,9 +88,11 @@ actor ProcessPipelineService {
 
     /// Process a completed recording session into a markdown runbook.
     func processRecording(_ session: ProcessRecordingSession) async -> PipelineResult? {
-        // Stage 1: Build timeline
+        // Stage 1: Build timeline + filter mic noise
         onStageUpdate?(.aligning, "Building timeline from events...")
-        let timeline = await buildTimeline(session)
+        let rawEvents = await MainActor.run { session.events }
+        let filteredEvents = await filterTranscriptRelevance(rawEvents)
+        let timeline = buildTimelineFromEvents(filteredEvents)
         let screenshots = await MainActor.run { session.screenshots }
         log("Pipeline: \(screenshots.count) screenshots, \(timeline.components(separatedBy: "\n").count) timeline events")
 
@@ -168,6 +173,8 @@ actor ProcessPipelineService {
                 }
             case .userNote(_, let text):
                 lines.append("\(ts) [NOTE] \(text)")
+            case .transcript(_, let text):
+                lines.append("\(ts) [SAID] \(text)")
             }
         }
         return lines.joined(separator: "\n")
@@ -200,9 +207,115 @@ actor ProcessPipelineService {
                 }
             case .userNote(_, let text):
                 lines.append("\(ts) [NOTE] \(text)")
+            case .transcript(_, let text):
+                lines.append("\(ts) [SAID] \(text)")
             }
         }
         return lines.joined(separator: "\n")
+    }
+
+    // MARK: - Transcript Relevance Filter
+
+    /// Drop transcript segments that don't relate to the workflow (background audio,
+    /// chitchat, podcasts that the mic happened to pick up). Single Haiku call that scores
+    /// each line against a context window of nearby clicks/screenshots/app switches.
+    /// Returns the events list with irrelevant `.transcript` entries removed; non-transcript
+    /// events pass through untouched.
+    private func filterTranscriptRelevance(_ events: [RecordingEvent]) async -> [RecordingEvent] {
+        let enabled = UserDefaults.standard.object(forKey: "QuickSnap.transcriptFilterEnabled") as? Bool ?? true
+        guard enabled else {
+            log("Transcript filter: disabled in settings, keeping all lines")
+            return events
+        }
+
+        // Index transcript events with their original timestamps so we can drop them later.
+        var transcriptLines: [(index: Int, timestamp: TimeInterval, text: String)] = []
+        for (i, event) in events.enumerated() {
+            if case .transcript(let ts, let text) = event {
+                transcriptLines.append((i, ts, text))
+            }
+        }
+        guard !transcriptLines.isEmpty else { return events }
+
+        // Build numbered prompt with ±5s context for each line.
+        let contextWindow: TimeInterval = 5
+        var promptLines: [String] = []
+        for (i, line) in transcriptLines.enumerated() {
+            let nearby = events.compactMap { event -> String? in
+                guard abs(event.timestamp - line.timestamp) <= contextWindow else { return nil }
+                switch event {
+                case .screenshot(_, _, _, let app, let window):
+                    return "[screen: \(app ?? "?")\(window.map { " — \($0)" } ?? "")]"
+                case .inputEvent(_, let kind):
+                    switch kind {
+                    case .mouseClick(_, let label, let app):
+                        return "[click in \(app ?? "?")\(label.map { " — \($0)" } ?? "")]"
+                    case .keyboardShortcut(let keys):
+                        return "[key: \(keys)]"
+                    case .clipboardChange:
+                        return "[clipboard]"
+                    }
+                case .userNote(_, let text):
+                    return "[note: \(text)]"
+                case .transcript:
+                    return nil // don't include other transcript lines as context
+                }
+            }.prefix(8).joined(separator: " ")
+            promptLines.append("\(i). [\(formatTimestamp(line.timestamp))] said: \"\(line.text)\"  context: \(nearby.isEmpty ? "(none)" : nearby)")
+        }
+
+        let prompt = """
+        You are filtering a process-recording transcript. The user was working on a computer task; the mic also picked up unrelated audio (podcasts, music, conversations in the room, ambient noise mis-transcribed as words).
+
+        For each numbered line below, decide:
+        - RELEVANT — the speaker is commenting on the task they're doing, naming a step, describing intent, asking a workflow question, or otherwise tied to the on-screen activity.
+        - IRRELEVANT — chitchat, background music/podcast lyrics, unrelated phone calls, or transcription noise that has no link to the surrounding clicks/screens.
+
+        When in doubt, KEEP the line — the cost of dropping a relevant aside is higher than keeping a borderline one.
+
+        Output ONLY a JSON array of the indices to KEEP, e.g. [0, 2, 5, 7]. No prose, no code fences.
+
+        Lines:
+        \(promptLines.joined(separator: "\n"))
+        """
+
+        guard let response = await sendLLMRequest(
+            model: "claude-haiku-4-5",
+            maxTokens: 800,
+            messages: [["role": "user", "content": prompt]],
+            stage: "transcript_filter"
+        ) else {
+            log("Transcript filter: LLM call failed, keeping all \(transcriptLines.count) lines")
+            return events
+        }
+
+        // Parse the JSON array of indices to keep.
+        let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleaned = trimmed
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let data = cleaned.data(using: .utf8),
+              let indices = try? JSONDecoder().decode([Int].self, from: data) else {
+            log("Transcript filter: could not parse response, keeping all \(transcriptLines.count) lines. Raw: \(cleaned.prefix(200))")
+            return events
+        }
+
+        let keepSet = Set(indices)
+        let droppedTimestamps = Set(
+            transcriptLines.enumerated()
+                .filter { !keepSet.contains($0.offset) }
+                .map { $0.element.timestamp }
+        )
+        let kept = transcriptLines.count - droppedTimestamps.count
+        log("Transcript filter: kept \(kept)/\(transcriptLines.count), dropped \(droppedTimestamps.count) as noise")
+
+        return events.filter { event in
+            if case .transcript(let ts, _) = event {
+                return !droppedTimestamps.contains(ts)
+            }
+            return true
+        }
     }
 
     private func chunkScreenshots(_ screenshots: [RecordingScreenshot], batchSize: Int) -> [[RecordingScreenshot]] {
@@ -294,6 +407,19 @@ actor ProcessPipelineService {
             5. Any error messages, visual glitches, or broken states visible in screenshots
 
             Output the reproduction steps as a numbered list. Include which application was used at each step. Flag the exact step where the bug manifests.
+            """
+        case .qaReport:
+            instruction = """
+            You are analyzing summaries from a QA test session where a tester moved between the application under test, a test plan/checklist, their notes, and possibly chat. Your job is to extract a structured account of what was tested.
+
+            Focus on:
+            1. Distinct test cases — group consecutive actions that exercise the same feature or scenario into one test case. Infer the case name from the action being verified.
+            2. The verification step in each case (what the tester checked / compared against expected behavior).
+            3. Outcome of each case: passed, failed, blocked, or skipped — infer from the tester's reaction (moving on vs. retrying vs. switching context to take notes).
+            4. Bugs encountered — any unexpected behavior, error message, visual glitch, or wrong result. Treat these as bugs even if the tester didn't explicitly flag them.
+            5. Time spent on test list/notes/chat vs the application — useful signal for which cases were straightforward vs investigative.
+
+            Output a numbered list. For each test case: a short title, the steps in order, the expected vs actual outcome, and a status. Then list any bugs separately. Include which application was used at each step.
             """
         }
 
@@ -423,6 +549,67 @@ actor ProcessPipelineService {
 
             ## Additional Notes
             Any patterns, workarounds, or related observations.
+            """
+
+        case .qaReport:
+            fallbackTitle = "QA Report"
+            instruction = """
+            Generate a comprehensive QA test session report in Markdown based on this recording.
+            The tester likely moved between the application under test, a test plan or checklist,
+            their notes, and chat — infer test cases from the patterns of repeated actions and
+            verifications. Treat each distinct verification flow as one test case. Treat each
+            unexpected outcome as a bug, even if the tester didn't explicitly flag it.
+
+            Structure the document as:
+
+            # QA Report: {Test Session Title}
+
+            ## Session Summary
+            2-3 sentences: what was tested, the build/feature under test, and the overall verdict.
+
+            ## Environment
+            - Application(s) and visible version(s)
+            - Platform / OS / browser if visible
+            - Test data, accounts, or fixtures used
+
+            ## Test Cases
+
+            ### TC-1: {Test Case Title}
+            **Status**: Pass / Fail / Blocked / Skipped
+            **Steps**:
+            1. ...
+            2. ...
+            **Expected**: What should have happened.
+            **Actual**: What actually happened.
+            **Notes**: Observations, edge cases tried, or related context.
+
+            ### TC-2: ...
+            (continue for every distinct test flow you can identify)
+
+            ## Bugs Found
+
+            ### BUG-1: {Brief description}
+            **Severity**: Critical / Major / Minor / Cosmetic
+            **Related Test Case**: TC-X (or "ad-hoc" if discovered outside a test case)
+            **Steps to Reproduce**:
+            1. ...
+            **Expected**: ...
+            **Actual**: ...
+            **Notes**: Is it consistent? Regression? Environment-specific? Any workaround?
+
+            ### BUG-2: ...
+            (omit this section entirely if no bugs were observed)
+
+            ## Coverage Notes
+            - What was covered well
+            - Gaps or scenarios not exercised in this session
+            - Suggested follow-up tests
+
+            ## Summary Stats
+            - Total test cases: X
+            - Passed: Y / Failed: Z / Blocked: W / Skipped: V
+            - Bugs found: N (Critical: a, Major: b, Minor: c, Cosmetic: d)
+            - Recommendation: Ship / Hold for fixes / Needs follow-up testing
             """
         }
 

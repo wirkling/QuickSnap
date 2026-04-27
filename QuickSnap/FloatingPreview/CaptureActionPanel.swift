@@ -26,6 +26,12 @@ final class CaptureActionState: ObservableObject {
     @Published var isHovering: Bool = false
     @Published var isCollapsed: Bool = false
     @Published var recordingTemplate: RecordingTemplate = .runbook
+    @Published var recordingMicEnabled: Bool = false
+    /// UID of the chosen input device, or nil for system default. Persisted across launches.
+    @Published var recordingMicDeviceUID: String? = nil
+    /// Mirrored from session.lastTranscriptText so the chip can preview it.
+    @Published var recordingLastTranscript: String = ""
+    @Published var recordingTranscriptCount: Int = 0
 
     var accumulatedScrollDelta: CGFloat = 0
     private let scrollThreshold: CGFloat = 2 // every tick = new card
@@ -392,15 +398,18 @@ final class CaptureActionPanel {
         panel.hasShadow = true
         panel.isReleasedWhenClosed = false
         panel.isMovableByWindowBackground = true
-        panel.sharingType = .none  // Exclude from all screen captures
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         // Force dark appearance so NSView-backed controls (segmented picker, menus)
         // render with light text on the dark panel background.
         panel.appearance = NSAppearance(named: .darkAqua)
         panel.contentView = hosting
 
-        // Default position: top center of main screen
-        if let screen = NSScreen.main {
+        // Position on the screen containing the mouse cursor, falling back to main.
+        // On multi-monitor setups, NSScreen.main is whatever has the menu bar, which
+        // is often not the screen the user just captured on.
+        let mouse = NSEvent.mouseLocation
+        let targetScreen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
+        if let screen = targetScreen {
             let vf = screen.visibleFrame
             let size = hosting.fittingSize
             let finalWidth = max(size.width, 560)
@@ -656,6 +665,10 @@ struct CaptureActionPanelView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
                 .help("Output template")
+
+                divider
+
+                MicChip(state: state)
 
                 Spacer(minLength: 4)
 
@@ -1180,6 +1193,109 @@ struct CaptureActionPanelView: View {
             return String(best[..<end]) + "…"
         }
         return best
+    }
+}
+
+/// Mic toggle + device picker shown during process recording.
+/// Off state: faded grey "Mic off" pill. On state: green "Mic on" with live phrase preview.
+/// The chevron opens a menu listing all detected input devices.
+private struct MicChip: View {
+    @ObservedObject var state: CaptureActionState
+    @State private var devices: [AudioInputDevice] = []
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Button(action: toggle) {
+                HStack(spacing: 6) {
+                    Image(systemName: state.recordingMicEnabled ? "mic.fill" : "mic.slash.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(state.recordingMicEnabled ? Color.green : Color.white.opacity(0.45))
+                    Text(label)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(state.recordingMicEnabled ? Color.white : Color.white.opacity(0.55))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    if state.recordingMicEnabled {
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 6, height: 6)
+                            .opacity(pulse ? 0.3 : 1.0)
+                            .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: pulse)
+                            .onAppear { pulse = true }
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(state.recordingMicEnabled ? Color.green.opacity(0.18) : Color.white.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+            .buttonStyle(.plain)
+            .help(state.recordingMicEnabled
+                  ? "Mic on — click to mute. Right side picks input device."
+                  : "Mic off — click to record and transcribe your voice.")
+
+            Menu {
+                Button {
+                    state.recordingMicDeviceUID = nil
+                    persistDevice()
+                } label: {
+                    Label("System default", systemImage: state.recordingMicDeviceUID == nil ? "checkmark" : "")
+                }
+                Divider()
+                ForEach(devices) { device in
+                    Button {
+                        state.recordingMicDeviceUID = device.uid
+                        persistDevice()
+                    } label: {
+                        Label(device.name, systemImage: state.recordingMicDeviceUID == device.uid ? "checkmark" : "")
+                    }
+                }
+                Divider()
+                Button("Refresh device list") {
+                    devices = AudioInputs.list()
+                }
+            } label: {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .frame(width: 18, height: 26)
+                    .background(Color.white.opacity(0.06))
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Pick input device")
+        }
+        .onAppear {
+            devices = AudioInputs.list()
+            if state.recordingMicDeviceUID == nil {
+                state.recordingMicDeviceUID = UserDefaults.standard.string(forKey: "QuickSnap.recordingMicDeviceUID")
+            }
+        }
+    }
+
+    private var label: String {
+        guard state.recordingMicEnabled else { return "Mic off" }
+        let preview = state.recordingLastTranscript
+        if !preview.isEmpty {
+            let trimmed = preview.count > 36 ? String(preview.prefix(36)) + "…" : preview
+            return "🎙 \(trimmed)"
+        }
+        if state.recordingTranscriptCount > 0 {
+            return "Mic on · \(state.recordingTranscriptCount) phrase\(state.recordingTranscriptCount == 1 ? "" : "s")"
+        }
+        return "Mic on · listening…"
+    }
+
+    private func toggle() {
+        state.recordingMicEnabled.toggle()
+        UserDefaults.standard.set(state.recordingMicEnabled, forKey: "QuickSnap.recordingMicEnabled")
+    }
+
+    private func persistDevice() {
+        UserDefaults.standard.set(state.recordingMicDeviceUID, forKey: "QuickSnap.recordingMicDeviceUID")
     }
 }
 

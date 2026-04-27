@@ -157,10 +157,31 @@ final class ScreenshotManager: ObservableObject {
             self?.handleRecordingFinished(session)
         }
         self.recordingController = controller
-        controller.start()
 
-        // Show recording action panel
+        // Sticky preferences: mic toggle + device choice. Off by default; nil device = system default.
+        let micEnabled = UserDefaults.standard.bool(forKey: "QuickSnap.recordingMicEnabled")
+        let micDeviceUID = UserDefaults.standard.string(forKey: "QuickSnap.recordingMicDeviceUID")
+
+        // Show recording action panel first so its toggle reflects the loaded preference.
         ensureActionPanel()
+        actionPanel?.state.recordingMicEnabled = micEnabled
+        actionPanel?.state.recordingMicDeviceUID = micDeviceUID
+
+        if micEnabled {
+            // Block recording start until permission is sorted, so we don't lose audio
+            // for the first few seconds while the system dialog is up.
+            Task { @MainActor in
+                let granted = await MicTranscriptionService.requestPermissions()
+                controller.start(micEnabled: granted, micDeviceUID: micDeviceUID)
+                if !granted {
+                    NSLog("[QuickSnap] Mic permission denied — recording proceeds without audio")
+                    self.actionPanel?.state.recordingMicEnabled = false
+                }
+            }
+        } else {
+            controller.start(micEnabled: false)
+        }
+
         actionPanel?.onStopRecording = { [weak self] in self?.stopProcessRecording() }
         actionPanel?.onPauseRecording = { [weak self] in self?.recordingController?.pause() }
         actionPanel?.onResumeRecording = { [weak self] in self?.recordingController?.resume() }
@@ -188,6 +209,9 @@ final class ScreenshotManager: ObservableObject {
                     events: session.eventCount,
                     frames: session.frameCount
                 )
+                // Mirror live mic state into the action panel so the chip can preview it.
+                self.actionPanel?.state.recordingTranscriptCount = session.transcriptSegments.count
+                self.actionPanel?.state.recordingLastTranscript = session.lastTranscriptText
 
                 // Check if a new complete batch is ready for background summarization
                 let framesReady = session.frameCount
@@ -228,6 +252,9 @@ final class ScreenshotManager: ObservableObject {
         recordingUpdateTimer?.invalidate()
         recordingUpdateTimer = nil
         backgroundSummarizer = nil
+        if let micEnabled = actionPanel?.state.recordingMicEnabled {
+            UserDefaults.standard.set(micEnabled, forKey: "QuickSnap.recordingMicEnabled")
+        }
         recordingController?.stop()
     }
 
